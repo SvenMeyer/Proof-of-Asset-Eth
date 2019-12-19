@@ -89,7 +89,8 @@ export default {
         console.log({valid});
       }
       */
-      return null; // this.form.owner ~ isValidAddress() // TODO
+
+      return this.form.owner && (this.validateAddress(this.form.owner) !== null);
     }
   },
 

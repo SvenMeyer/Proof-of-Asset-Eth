@@ -20,18 +20,7 @@ export default {
         fromBech32Address,
         // isValidChecksumAddress
       } = zilliqa.crypto;
-/*
-      if (validation.isAddress(address)) {
-        const result = isValidChecksumAddress(address);
-        console.log({result});
-      } else if (validation.isBase58(address)) {
-        address = decodeBase58(address);
-      } else if (validation.isBech32(address)) {
-        address = fromBech32Address(address);
-        console.log({address});
-      }
-      return toChecksumAddress(address);
-*/
+
       if (validation.isBech32(address)) {
         return fromBech32Address(address) }
       else if (validation.isBase58(address)) {
