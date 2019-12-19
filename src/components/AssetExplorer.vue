@@ -1,30 +1,13 @@
 <template>
-    <b-jumbotron>
-      <h1>Proof of Asset Explorer</h1>
-      <p class="lead">List all assets registered by a certain address:</p>
+  <b-jumbotron>
+    <h1>Proof of Asset Explorer</h1>
+    <p class="lead">List all assets registered by a certain address:</p>
 
-      <small class="lead text-danger">{{errorMsg}}</small>
-<!--
-    <b-form class="pt-3">
-      <b-form-group
-        label="Asset owner:"
-        description="The value should be an Zilliqa address.">
-        <b-form-input
-          v-model="form.owner"
-          :state="validAddress"
-          type="text"
-          required
-          placeholder="Enter your zil address">
-        </b-form-input>
-      </b-form-group>
-
-      <b-button @click="deploy" type="button" variant="primary">Search</b-button>
-    </b-form>
--->
+    <small class="lead text-danger">{{errorMsg}}</small>
 
     <b-input-group class="mb-3" prepend="Zil Address">
       <b-form-input
-        v-model="form.owner"
+        v-model="owner_address"
         :state="validAddress"
         type="text"
         required>
@@ -33,6 +16,8 @@
         <b-button @click="deploy" type="button" variant="primary">Search</b-button>
       </b-input-group-append>
     </b-input-group>
+
+    <b-table striped hover :items="items"></b-table>
 
 
     <!--
@@ -60,63 +45,60 @@
 </template>
 
 <script>
-import {
-  BJumbotron,
-  // BFormGroup,
-  BFormInput,
-  // BForm
-} from 'bootstrap-vue'
+import {BJumbotron, BFormInput} from 'bootstrap-vue'
 import ZilPayMixin from '../mixins/ZilPay'
 import LoadMixin from '../mixins/loader'
 import ViewBlockMixin from '../mixins/viewBlock'
+import ProofIPFS_API_mixin from '../mixins/ProofIPFS_API_mixin'
 
 
 export default {
-  name: 'Deploy-form',
-  mixins: [ZilPayMixin, LoadMixin, ViewBlockMixin],
+  name: 'AssetExplorer',
+  mixins: [ZilPayMixin, LoadMixin, ViewBlockMixin, ProofIPFS_API_mixin],
   components: {
     'b-jumbotron': BJumbotron,
-    // 'b-form': BForm,
-    // 'b-form-group': BFormGroup,
     'b-form-input': BFormInput
+  },
+
+  // props: [contract_address],
+
+  data() {
+    return {
+      owner_address: null,
+      errorMsg: null,
+      // contract: {},
+      contract_address: "zil13jjcwrph3zrz04ua45gsz6295wycaa7r5ar4c9", // testnet
+      proof_ipfs: null,
+      items: [],
+    };
   },
 
   computed: {
     validAddress() {
-      /*
-      if (this.form.owner) {
-        const valid = this.validateAddress(this.form.owner);
-        console.log({valid});
-      }
-      */
-
-      return this.form.owner && (this.validateAddress(this.form.owner) !== null);
+       return this.owner_address && (this.validateAddress(this.owner_address) !== null);
     }
-  },
-
-  data() {
-    return {
-      form: {
-        owner: null,
-      },
-      errorMsg: null,
-      contract: {},
-    };
   },
 
   methods: {
 
     async deploy() {
-      console.log("this.form.owner =", this.form.owner);
       this.errorMsg = null;
+      const hex_address = this.validateAddress(this.owner_address);
+      console.log("this.owner_address =", hex_address);
 
-      console.log(this.validateAddress(this.form.owner));
+      // this.startLoading('Transaction pending ...');
+      const result = await this.getItemList(hex_address);
+      console.log({result});
+      this.items = result.map(i => ({'Asset IPFS Hash' : i}));
+      console.log(this.items)
+      // this.endLoading();
+    },
 
-      this.startLoading('Transaction pending ...');
+
 /*
       try {
         this.contract = await this.deployFungibleToken(
-          this.form.owner,
+          this.owner_address,
           this.form.totalSupply,
           this.form.decimals,
           this.form.name,
@@ -128,18 +110,19 @@ export default {
         this.errorMsg = err.message || err;
       }
 */
-      this.endLoading();
-    },
+
 
     observableAccount() {
       setTimeout(() => {
-        this.form.owner = window.zilPay.wallet.defaultAccount.bech32;
+        this.owner_address = window.zilPay.wallet.defaultAccount.bech32;
         window.zilPay.wallet.observableAccount().subscribe(account => {
-          this.form.owner = account.bech32;
+          this.owner_address = account.bech32;
         });
       }, 1000);
     }
+
   },
+
   mounted() {
     try {
       this.observableAccount();

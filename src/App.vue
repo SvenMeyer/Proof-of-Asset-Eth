@@ -35,8 +35,7 @@
     </div>
 
     <b-container class="mt-5">
-      <deploy-form/>
-      <!-- <connect-form/> -->
+      <asset-explorer/>
     </b-container>
 
     <b-modal :ref="code.notZilPay"
@@ -67,9 +66,7 @@
 </template>
 
 <script>
-import DeployForm from './components/Deploy-form'
-// import ConnectForm from './components/Connect-form'
-
+import AssetExplorer from './components/AssetExplorer'
 import ZilPayMixin from './mixins/ZilPay'
 import LoadMixin from './mixins/loader'
 
@@ -79,14 +76,15 @@ export default {
   name: 'app',
   mixins: [ZilPayMixin, LoadMixin],
   components: {
-    'deploy-form':    DeployForm,
+    'asset-explorer':    AssetExplorer,
     // 'connect-form':   ConnectForm,
   },
 
   data() {
     return {
       selectedNetwork: "testnet",
-      networks: ["mainnet", "testnet", "private"]
+      networks: ["mainnet", "testnet", "private"],
+      // contract_address: "zil13jjcwrph3zrz04ua45gsz6295wycaa7r5ar4c9", // testnet
     };
   },
 
