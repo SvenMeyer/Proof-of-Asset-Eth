@@ -2,33 +2,36 @@
   <div id="app">
 
     <b-navbar toggleable="lg" type="dark" variant="dark">
-      <b-navbar-brand href="#">NavBar</b-navbar-brand>
+      <b-navbar-brand href="#">Zilliqa ProofIPFS Explorer</b-navbar-brand>
 
-      <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+      <!-- <b-navbar-toggle target="nav-collapse"></b-navbar-toggle> -->
 
-      <b-collapse id="nav-collapse" is-nav>
+      <!-- <b-collapse id="nav-collapse" is-nav> -->
+        <!--
         <b-navbar-nav>
           <b-nav-item href="#">Link</b-nav-item>
           <b-nav-item href="#" disabled>Disabled</b-nav-item>
         </b-navbar-nav>
+        -->
 
         <!-- Right aligned nav items -->
         <b-navbar-nav class="ml-auto">
-          <b-nav-item-dropdown :text=selectedLanguage right>
+          <b-nav-item-dropdown :text=selectedNetwork right>
             <b-dropdown-item
-              v-for="language in languages"
-              :key="language"
-              :active="language === selectedLanguage"
+              v-for="network in networks"
+              :key="network"
+              :active="network === selectedNetwork"
               href="#"
-              @click="selectLanguage(language)"
-            >{{ language }}</b-dropdown-item>
+              @click="setNetwork(network)"
+            >{{ network }}</b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
-      </b-collapse>
+      <!-- </b-collapse> -->
+
     </b-navbar>
 
     <div>
-      {{selectedLanguage}}
+      {{selectedNetwork}}
     </div>
 
     <b-container class="mt-5">
@@ -87,14 +90,14 @@ export default {
 
   data() {
     return {
-      selectedLanguage: "EN",
-      languages: ["EN", "DE", "ES", "RU"]
+      selectedNetwork: "testnet",
+      networks: ["mainnet", "testnet", "private"]
     };
   },
 
   methods: {
-    selectLanguage(language) {
-      this.selectedLanguage = language;
+    setNetwork(new_network) {
+      this.selectedNetwork = new_network;
     }
   },
 
