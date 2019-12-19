@@ -13,11 +13,17 @@
         required>
       </b-form-input>
       <b-input-group-append>
-        <b-button @click="deploy" type="button" variant="primary">Search</b-button>
+        <b-button @click="searchItems" type="button" variant="primary">Search</b-button>
       </b-input-group-append>
     </b-input-group>
 
-    <b-table striped hover :items="items"></b-table>
+    <b-table bordered striped hover :items="items">
+
+      <template v-slot:cell(documents)="data">
+        <span v-html="data.value"></span>
+      </template>
+
+    </b-table>
 
 
     <!--
@@ -70,6 +76,8 @@ export default {
       contract_address: "zil13jjcwrph3zrz04ua45gsz6295wycaa7r5ar4c9", // testnet
       proof_ipfs: null,
       items: [],
+      ipfs_node: 'localhost',
+      ipfs_view: 'http://localhost:1111/ipfs/',  // 'https://ipfs.io/ipfs/',
     };
   },
 
@@ -81,7 +89,7 @@ export default {
 
   methods: {
 
-    async deploy() {
+    async searchItems() {
       this.errorMsg = null;
       const hex_address = this.validateAddress(this.owner_address);
       console.log("this.owner_address =", hex_address);
@@ -89,8 +97,10 @@ export default {
       // this.startLoading('Transaction pending ...');
       const result = await this.getItemList(hex_address);
       console.log({result});
-      this.items = result.map(i => ({'Asset IPFS Hash' : i}));
-      console.log(this.items)
+      const tableRows = result.map(i => ({'Asset IPFS Hash' : i , documents: "<a href='" + this.ipfs_view + i + "' target='_blank'>" + "[Documents Link]" + "</a>"}));
+      // const tableRows = result.map(i => ({'Asset IPFS Hash' : i}));
+      console.log(tableRows)
+      this.items = tableRows;
       // this.endLoading();
     },
 

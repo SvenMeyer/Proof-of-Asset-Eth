@@ -30,10 +30,6 @@
 
     </b-navbar>
 
-    <div>
-      {{selectedNetwork}}
-    </div>
-
     <b-container class="mt-5">
       <asset-explorer/>
     </b-container>
@@ -70,14 +66,11 @@ import AssetExplorer from './components/AssetExplorer'
 import ZilPayMixin from './mixins/ZilPay'
 import LoadMixin from './mixins/loader'
 
-
-
 export default {
   name: 'app',
   mixins: [ZilPayMixin, LoadMixin],
   components: {
     'asset-explorer':    AssetExplorer,
-    // 'connect-form':   ConnectForm,
   },
 
   data() {
