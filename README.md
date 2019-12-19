@@ -1,4 +1,4 @@
-# ft-creater
+# Zilliqa_ProofIPFS_Explorer
 
 ## Project setup
 ```
