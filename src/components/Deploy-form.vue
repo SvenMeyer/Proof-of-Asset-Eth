@@ -35,7 +35,7 @@
     </b-input-group>
 
 
-
+    <!--
     <b-modal :ref="isDeploy"
              hide-footer
              title="Contract created">
@@ -54,6 +54,7 @@
       <hr>
       <tree-view :data="contract.init" :options="treeViewOptions"></tree-view>
     </b-modal>
+    -->
 
   </b-jumbotron>
 </template>
@@ -82,6 +83,12 @@ export default {
 
   computed: {
     validAddress() {
+      /*
+      if (this.form.owner) {
+        const valid = this.validateAddress(this.form.owner);
+        console.log({valid});
+      }
+      */
       return null; // this.form.owner ~ isValidAddress() // TODO
     }
   },
@@ -92,14 +99,7 @@ export default {
         owner: null,
       },
       errorMsg: null,
-      isDeploy: 'contract-deployed',
       contract: {},
-      treeViewOptions: {
-        maxDepth: 4,
-        rootObjectKey: "init",
-        modifiable: false,
-        link: false
-      }
     };
   },
 
@@ -108,7 +108,10 @@ export default {
     async deploy() {
       console.log("this.form.owner =", this.form.owner);
       this.errorMsg = null;
-      this.startLoading('Transaction padding');
+
+      console.log(this.validateAddress(this.form.owner));
+
+      this.startLoading('Transaction pending ...');
 /*
       try {
         this.contract = await this.deployFungibleToken(

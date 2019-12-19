@@ -37,7 +37,6 @@
     <b-container class="mt-5">
       <deploy-form/>
       <!-- <connect-form/> -->
-      <!-- <item-list-form /> -->
     </b-container>
 
     <b-modal :ref="code.notZilPay"
@@ -70,7 +69,6 @@
 <script>
 import DeployForm from './components/Deploy-form'
 // import ConnectForm from './components/Connect-form'
-// import ItemListForm from './components/ItemListForm'
 
 import ZilPayMixin from './mixins/ZilPay'
 import LoadMixin from './mixins/loader'
@@ -83,7 +81,6 @@ export default {
   components: {
     'deploy-form':    DeployForm,
     // 'connect-form':   ConnectForm,
-    // 'item-list-form': ItemListForm
   },
 
   data() {

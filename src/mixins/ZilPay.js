@@ -8,26 +8,40 @@ export default {
       },
     };
   },
+
   methods: {
-    validateAddreas(address) {
+
+    validateAddress(address) {
       const zilliqa = window.zilPay;
       const { validation } = zilliqa.utils;
       const {
         decodeBase58,
         toChecksumAddress,
         fromBech32Address,
-        isValidChecksumAddress
+        // isValidChecksumAddress
       } = zilliqa.crypto;
-
+/*
       if (validation.isAddress(address)) {
-        address = isValidChecksumAddress(address);
+        const result = isValidChecksumAddress(address);
+        console.log({result});
       } else if (validation.isBase58(address)) {
         address = decodeBase58(address);
       } else if (validation.isBech32(address)) {
         address = fromBech32Address(address);
+        console.log({address});
       }
       return toChecksumAddress(address);
+*/
+      if (validation.isBech32(address)) {
+        return fromBech32Address(address) }
+      else if (validation.isBase58(address)) {
+        return decodeBase58(address) }
+      else if (validation.isAddress(address)) {
+        return toChecksumAddress(address) }
+      else
+        return null;
     },
+
     zilpayTest() {
       if (typeof window.zilPay === 'undefined') {
         return this.code.notZilPay;
@@ -36,16 +50,17 @@ export default {
       } else if (!window.zilPay.wallet.isConnect) {
         return this.code.notConnect;
       }
-      
+
       return true;
     },
+
     async deployFungibleToken(owner, totalTokens, decimals, name, symbol) {
       const zilliqa = window.zilPay;
       const { units, Long } = zilliqa.utils;
       const { toBech32Address } = zilliqa.crypto;
       const code = window.code;
-      
-      owner = this.validateAddreas(owner);
+
+      owner = this.validateAddress(owner);
 
       const init = [
         {
@@ -93,6 +108,7 @@ export default {
         id: deployTx.TranID
       };
     },
+
     async txObservable(id) {
       return new Promise(resolve => {
         const zilliqa = window.zilPay;
@@ -108,10 +124,11 @@ export default {
         }, 3000);
       });
     },
+
     async contractInfo(address) {
       const zilliqa = window.zilPay;
-      
-      address = this.validateAddreas(address);
+
+      address = this.validateAddress(address);
       address = address.replace('0x', '');
 
       const init = await zilliqa.blockchain.getSmartContractInit(address);
@@ -126,6 +143,7 @@ export default {
         state: state.result
       };
     },
+
     async TransferFrom(address, payload) {
       const zilliqa = window.zilPay;
       const { units, BN, Long } = zilliqa.utils;
@@ -137,12 +155,12 @@ export default {
           {
             vname: "from",
             type: "ByStr20",
-            value: this.validateAddreas(payload.from)
+            value: this.validateAddress(payload.from)
           },
           {
             vname: "to",
             type: "ByStr20",
-            value: this.validateAddreas(payload.to)
+            value: this.validateAddress(payload.to)
           },
           {
             vname: "tokens",
@@ -159,6 +177,7 @@ export default {
 
       return tx.TranID;
     },
+
     async Transfer(address, payload) {
       const zilliqa = window.zilPay;
       const { units, BN, Long } = zilliqa.utils;
@@ -170,7 +189,7 @@ export default {
           {
             vname: "to",
             type: "ByStr20",
-            value: this.validateAddreas(payload.to)
+            value: this.validateAddress(payload.to)
           },
           {
             vname: "tokens",
@@ -187,6 +206,7 @@ export default {
 
       return tx.TranID;
     },
+
     async Approve(address, payload) {
       const zilliqa = window.zilPay;
       const { units, BN, Long } = zilliqa.utils;
@@ -198,7 +218,7 @@ export default {
           {
             vname: "spender",
             type: "ByStr20",
-            value: this.validateAddreas(payload.spender)
+            value: this.validateAddress(payload.spender)
           },
           {
             vname: "tokens",
@@ -215,6 +235,7 @@ export default {
 
       return tx.TranID;
     },
+
     async Allowance(address, payload) {
       const zilliqa = window.zilPay;
       const { units, BN, Long } = zilliqa.utils;
@@ -226,7 +247,7 @@ export default {
           {
             vname: "tokenOwner",
             type: "ByStr20",
-            value: this.validateAddreas(payload.tokenOwner)
+            value: this.validateAddress(payload.tokenOwner)
           },
           {
             vname: "spender",
