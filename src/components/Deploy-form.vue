@@ -1,79 +1,50 @@
 <template>
     <b-jumbotron>
-      <h1>FungibleToken creator</h1>
-      <p class="lead">This dApp is a form to create fungible tokens.</p>
-      <p>This token implements a fungible token interface a la ERC20.</p>
+      <h1>Proof of Asset Explorer</h1>
+      <p class="lead">List all assets registered by a certain address:</p>
 
       <small class="lead text-danger">{{errorMsg}}</small>
-
+<!--
     <b-form class="pt-3">
       <b-form-group
-        label="Contract owner:"
-        description="It's value should be an Zilliqa address.">
+        label="Asset owner:"
+        description="The value should be an Zilliqa address.">
         <b-form-input
           v-model="form.owner"
+          :state="validAddress"
           type="text"
           required
           placeholder="Enter your zil address">
         </b-form-input>
       </b-form-group>
 
-      <b-form-group
-        label="Token name:"
-        description="It's value should be the token name.">
-        <b-form-input
-          v-model="form.name"
-          type="text"
-          required
-          placeholder="Your token name">
-        </b-form-input>
-      </b-form-group>
-
-      <b-form-group
-        label="Token symbol:"
-        description="A ticker symbol or stock symbol.">
-        <b-form-input
-          v-model="form.symbol"
-          type="text"
-          required
-          placeholder="Your token symbol">
-        </b-form-input>
-      </b-form-group>
-
-      <b-form-group
-        label="Total supply of tokens:"
-        description="It's value should be the total supply of the tokens.">
-        <b-form-input
-          v-model="form.totalSupply"
-          type="text"
-          required
-          placeholder="Total supply value">
-        </b-form-input>
-      </b-form-group>
-
-      <b-form-group
-        label="Decimals:"
-        description="18 is the most common number of decimal places.">
-        <b-form-input
-          v-model="form.decimals"
-          type="number"
-          required
-          placeholder="Decimals value">
-        </b-form-input>
-      </b-form-group>
-
-      <b-button @click="deploy" type="button" variant="primary">Deploy</b-button>
+      <b-button @click="deploy" type="button" variant="primary">Search</b-button>
     </b-form>
+-->
+
+    <b-input-group class="mb-3" prepend="Zil Address">
+      <b-form-input
+        v-model="form.owner"
+        :state="validAddress"
+        type="text"
+        required>
+      </b-form-input>
+      <b-input-group-append>
+        <b-button @click="deploy" type="button" variant="primary">Search</b-button>
+      </b-input-group-append>
+    </b-input-group>
+
+
 
     <b-modal :ref="isDeploy"
              hide-footer
              title="Contract created">
-      <h6>Contract: 
+      <h6>Contract:
         <a :href="explore(contract.ContractAddress, 'address')"
            class="text-info"
            target="_blank">{{contract.ContractAddress}}</a>
       </h6>
-      <h6>owner: 
+      <h6>owner:
         <a :href="explore(contract.owner, 'address')"
            class="text-info"
            target="_blank">{{contract.owner}}</a></h6>
@@ -83,15 +54,16 @@
       <hr>
       <tree-view :data="contract.init" :options="treeViewOptions"></tree-view>
     </b-modal>
+
   </b-jumbotron>
 </template>
 
 <script>
 import {
   BJumbotron,
-  BFormGroup,
+  // BFormGroup,
   BFormInput,
-  BForm
+  // BForm
 } from 'bootstrap-vue'
 import ZilPayMixin from '../mixins/ZilPay'
 import LoadMixin from '../mixins/loader'
@@ -103,18 +75,21 @@ export default {
   mixins: [ZilPayMixin, LoadMixin, ViewBlockMixin],
   components: {
     'b-jumbotron': BJumbotron,
-    'b-form': BForm,
-    'b-form-group': BFormGroup,
+    // 'b-form': BForm,
+    // 'b-form-group': BFormGroup,
     'b-form-input': BFormInput
   },
+
+  computed: {
+    validAddress() {
+      return null; // this.form.owner ~ isValidAddress() // TODO
+    }
+  },
+
   data() {
     return {
       form: {
         owner: null,
-        name: null,
-        symbol: null,
-        totalSupply: null,
-        decimals: 18
       },
       errorMsg: null,
       isDeploy: 'contract-deployed',
@@ -127,11 +102,14 @@ export default {
       }
     };
   },
+
   methods: {
+
     async deploy() {
+      console.log("this.form.owner =", this.form.owner);
       this.errorMsg = null;
       this.startLoading('Transaction padding');
-
+/*
       try {
         this.contract = await this.deployFungibleToken(
           this.form.owner,
@@ -145,9 +123,10 @@ export default {
       } catch(err) {
         this.errorMsg = err.message || err;
       }
-
+*/
       this.endLoading();
     },
+
     observableAccount() {
       setTimeout(() => {
         this.form.owner = window.zilPay.wallet.defaultAccount.bech32;

@@ -35,15 +35,9 @@
     </div>
 
     <b-container class="mt-5">
-
-      <b-row>
-        <b-col>
-          <deploy-form/>
-        </b-col>
-        <b-col>
-          <connect-form/>
-        </b-col>
-      </b-row>
+      <deploy-form/>
+      <!-- <connect-form/> -->
+      <!-- <item-list-form /> -->
     </b-container>
 
     <b-modal :ref="code.notZilPay"
@@ -65,7 +59,7 @@
 
     <b-modal :ref="code.notEnable"
              hide-footer
-             title="ZilPay is not Enable!">
+             title="ZilPay is not enabled !">
       <b-row class="justify-content-md-center">
         <img src="/img/lock.png">
       </b-row>
@@ -75,17 +69,21 @@
 
 <script>
 import DeployForm from './components/Deploy-form'
-import ConnectForm from './components/Connect-form'
+// import ConnectForm from './components/Connect-form'
+// import ItemListForm from './components/ItemListForm'
+
 import ZilPayMixin from './mixins/ZilPay'
 import LoadMixin from './mixins/loader'
+
 
 
 export default {
   name: 'app',
   mixins: [ZilPayMixin, LoadMixin],
   components: {
-    'deploy-form': DeployForm,
-    'connect-form': ConnectForm
+    'deploy-form':    DeployForm,
+    // 'connect-form':   ConnectForm,
+    // 'item-list-form': ItemListForm
   },
 
   data() {
@@ -106,6 +104,7 @@ export default {
     window.addEventListener("load", async () => {
       this.endLoading();
       const test = await this.zilpayTest();
+      console.log("zilpayTest : ", test);
 
       if (test === this.code.notZilPay) {
         this.$refs[this.code.notZilPay].show();
@@ -118,6 +117,7 @@ export default {
   }
 }
 </script>
+
 
 <style>
 
