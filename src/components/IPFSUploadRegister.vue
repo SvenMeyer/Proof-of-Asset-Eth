@@ -5,12 +5,19 @@
 
     <small class="lead text-danger">{{errorMsg}}</small>
 
-		<b-form-file v-model="file" ref="file-input" class="mb-2" autofocus multiple></b-form-file>
-
+		<b-form class="margin-sm" @submit.stop.prevent="handleSubmit">
+			<div class="border-style">
+				<b-form-file v-model="fileObject" ref="file-input" class="mb-2" autofocus multiple/>
+			</div>
+			<b-button class="margin-xs" variant="secondary" @click="handleOk">
+				Upload to IPFS
+			</b-button>
+		</b-form>
 
 
 		<div class="mt-5">
-			<!-- <b-form @submit="onSubmit" @reset="onReset" v-if="show"> -->
+			<p class="lead">Document Metadata for Zilliqa Blockchain Registration:</p>
+
 			<b-form>
 
 				<b-form-group id="input-group-1">
@@ -18,7 +25,7 @@
 					<b-form-group id="input-group-2" label="Asset Hash:" label-for="input-2">
 						<b-form-input
 							id="input-2"
-							v-model="form.asset_hash"
+							v-model="ipfs_hash"
 							required
 						></b-form-input>
 					</b-form-group>
@@ -47,15 +54,14 @@
 						></b-form-input>
 					</b-form-group>
 
-					<b-button @click="register" type="button" variant="primary">Submit</b-button>
+					<b-button @click="handleRegister" type="button" variant="primary">Submit</b-button>
 
 				</b-form-group>
 
 			</b-form>
 
-			<b-card class="mt-3" header="Form Data Result">
-				<pre class="m-0">{{ form }}</pre>
-			</b-card>
+			<p>txHash    : 0x{{ txHash }}</p>
+      <p>txMessage : {{ txMessage }}</p>
 
 		</div>
 
@@ -85,6 +91,8 @@
 
 <script>
 import {BJumbotron, BFormInput} from 'bootstrap-vue'
+// mixins
+import ipfs from "../mixins/ipfs";
 import ZilPayMixin from '../mixins/ZilPay'
 import LoadMixin from '../mixins/loader'
 import ViewBlockMixin from '../mixins/viewBlock'
@@ -95,30 +103,29 @@ export default {
   name: 'AssetExplorer',
   mixins: [ZilPayMixin, LoadMixin, ViewBlockMixin, ProofIPFS_API_mixin],
   components: {
-    'b-jumbotron': BJumbotron,
+    'b-jumbotron' : BJumbotron,
     'b-form-input': BFormInput
   },
-
-  // props: [contract_address],
 
   data() {
     return {
 			show: true,
+			fileObject: null,
+			ipfs_hash: "",
 			form: {
-				asset_hash: "",
 				asset_serial: "",
 				product_name: "",
 				custodian: "",
 			},
+			txHash: "",
+			txMessage: "",
 
 			owner_address: null,
 			errorMsg: null,
       // contract: {},
-      contract_address: "zil13jjcwrph3zrz04ua45gsz6295wycaa7r5ar4c9", // testnet
+      // contract_address: "zil13jjcwrph3zrz04ua45gsz6295wycaa7r5ar4c9", // testnet
       proof_ipfs: null,
       items: [],
-      ipfs_node: 'localhost:5001',
-      ipfs_view: 'http://localhost:1111/ipfs/',  // 'https://ipfs.io/ipfs/',
     };
   },
 
@@ -130,8 +137,75 @@ export default {
 
   methods: {
 
-		async register() {
-			console.log("register : form =", this.form);
+    handleOk() {
+      if (!this.fileObject) {
+        alert("Please select a file to upload.");
+      } else {
+        this.saveToIpfsWithFilename(this.fileObject)
+      }
+    },
+
+    // Add one file to IPFS and return a CID
+    saveToIpfs (file) {
+      ipfs.add(file, { progress: (prog) => console.log(`received: ${prog}`) })
+        .then((response) => {
+          this.ipfs_hash = response[0].hash;
+          this.metadata  = "{filename : '" + file.name + "'}";
+        }).catch((err) => {
+          console.error(err)
+        })
+    },
+
+    // Add one or multiple files to IPFS and wrap it in a directory to keep the original filename
+    saveToIpfsWithFilename (files) {
+      const fileDetails = [...files].map(file => ({path: file.name, content: file}));
+      const fileNames   = [...files].map(file => (file.name));
+      const options = {
+        wrapWithDirectory: true,
+        progress: (prog) => console.log(`received: ${prog}`)
+      }
+      ipfs.add(fileDetails, options)
+        .then((response) => {
+          // CID of wrapping directory is returned last
+          this.ipfs_hash = response[response.length - 1].hash
+          this.metadata  = JSON.stringify({filenames : fileNames});
+        }).catch((err) => {
+          console.error(err)
+        })
+		},
+
+		async handleRegister() {
+			console.log("handleRegister : form =", this.form);
+			console.log("ipfs_hash =", this.ipfs_hash);
+			const metadata = JSON.stringify(this.form);
+			console.log("metadata  =", metadata);
+
+			const callTx = await this.registerOwnership(this.ipfs_hash, metadata);
+      // console.log(JSON.stringify(callTx));
+
+      this.txHash = callTx.TranID;
+      console.log("txHash =", JSON.stringify(this.txHash));
+
+      function timeout(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+			const zilliqa = window.zilPay;
+      const now = Date.now();
+      let pending = true;
+      while (pending) {
+        await timeout(2000);
+
+        zilliqa.blockchain.getTransaction(this.txHash)
+        .then(status => {
+          console.log("txStatus =", JSON.stringify(status));
+          pending = false;
+          this.txMessage = (status.receipt.success ? 'confirmed' : 'failed');
+        }, reject_status => {
+					this.txMessage = Math.round((Date.now() - now)/1000) + ' %';
+					console.log({reject_status});
+        });
+      }
 		},
 
 

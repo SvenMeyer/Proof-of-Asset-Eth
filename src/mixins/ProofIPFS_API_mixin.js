@@ -85,7 +85,12 @@ class ProofIPFS_API {
   }
 */
 
+const contract_address = "zil13jjcwrph3zrz04ua45gsz6295wycaa7r5ar4c9"; // testnet
+
 export default {
+
+	contract_address,
+
   data() {
     return {
 
@@ -99,7 +104,7 @@ export default {
 			const zilliqa = window.zilPay;
 			// const { units, BN, Long } = zilliqa.utils;
 			// const gasPrice = units.toQa('1000', units.Units.Li);
-			this.proof_ipfs = zilliqa.contracts.at(this.contract_address);
+			this.proof_ipfs = zilliqa.contracts.at(contract_address);
 			const a = hex_address.toLowerCase();
 			let item_list = [];
 			if (this.chain_id != 111) {
@@ -146,15 +151,24 @@ export default {
 				});
 		},
 
+		async getPrice() {
+			const zilliqa = window.zilPay;
+			const proof_ipfs = zilliqa.contracts.at(contract_address);
+			const substate = proof_ipfs.getSubState("price");
+			return substate.price ? parseInt(substate.price) : 0;
+		},
+
 		// call contract transition
 		// https://github.com/Zilliqa/Zilliqa-JavaScript-Library/tree/dev/packages/zilliqa-js-contract#calltransition-string-args-value-params-callparams-promisetransaction
 
 		async registerOwnership(ipfs_cid, metadata) {
+			console.log("registerOwnership : contract_address =", contract_address)
 			const zilliqa = window.zilPay;
-			// const { units, BN, Long } = zilliqa.utils;
-			const { BN } = zilliqa.utils;
-			// const gasPrice = units.toQa('1000', units.Units.Li);
-			this.proof_ipfs = zilliqa.contracts.at(this.contract_address);
+			const { units, BN, Long } = zilliqa.utils;
+			const myGasPrice = units.toQa('1000', units.Units.Li);
+
+			this.proof_ipfs = zilliqa.contracts.at(contract_address);
+
 			const params_call = [
 				{
 					vname: "ipfs_cid",
@@ -168,8 +182,16 @@ export default {
 				}
 			];
 
+			// amount, gasPrice and gasLimit must be explicitly provided
+			const params_default = {
+				version: this.VERSION,
+				amount: new BN(0),
+				gasPrice: myGasPrice,
+				gasLimit: Long.fromNumber(8000)
+			};
+
 			return this.getPrice().then(price => {
-				let params_register = this.params_default;
+				let params_register = params_default;
 				params_register.amount = new BN(price);
 				return this.proof_ipfs.call(
 					"registerOwnership",
