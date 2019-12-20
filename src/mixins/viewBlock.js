@@ -7,7 +7,7 @@ export default {
   methods: {
     explore(id, type='tx') {
       // eslint-disable-next-line
-      const network = !!window.zilPay ? window.zilPay.wallet.net : 'mainnet';
+      const network = !!window.zilPay ? window.zilPay.wallet.net : 'testnet';
       return `${this.viewBlockUrl}/${type}/${id}?network=${network}`;
     }
   }

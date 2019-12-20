@@ -7,8 +7,6 @@ import IPFS from "ipfs-http-client";
 
 const ipfs_node = 'http://localhost:5001';
 
-const ipfs = new IPFS(ipfs_node);
+export const ipfs = new IPFS(ipfs_node);
 
-// const ipfs_view = 'http://localhost:1111/ipfs/'; // 'https://ipfs.io/ipfs/',
-
-export default ipfs;
+export const ipfs_view = 'http://localhost:1111/ipfs/'; // 'https://ipfs.io/ipfs/',

@@ -60,7 +60,7 @@
 
 			</b-form>
 
-			<p>txHash    : 0x{{ txHash }}</p>
+			<p>txHash    : <b-link :href="explore(txHash)" :disabled="txMessage != 'confirmed'" target="_blank">{{ txHash }}</b-link></p>
       <p>txMessage : {{ txMessage }}</p>
 
 		</div>
@@ -92,7 +92,7 @@
 <script>
 import {BJumbotron, BFormInput} from 'bootstrap-vue'
 // mixins
-import ipfs from "../mixins/ipfs";
+import {ipfs} from "../mixins/ipfs";
 import ZilPayMixin from '../mixins/ZilPay'
 import LoadMixin from '../mixins/loader'
 import ViewBlockMixin from '../mixins/viewBlock'
@@ -122,8 +122,6 @@ export default {
 
 			owner_address: null,
 			errorMsg: null,
-      // contract: {},
-      // contract_address: "zil13jjcwrph3zrz04ua45gsz6295wycaa7r5ar4c9", // testnet
       proof_ipfs: null,
       items: [],
     };
@@ -132,7 +130,7 @@ export default {
   computed: {
     validAddress() {
        return this.owner_address && (this.validateAddress(this.owner_address) !== null);
-    }
+		},
   },
 
   methods: {
@@ -181,7 +179,6 @@ export default {
 			console.log("metadata  =", metadata);
 
 			const callTx = await this.registerOwnership(this.ipfs_hash, metadata);
-      // console.log(JSON.stringify(callTx));
 
       this.txHash = callTx.TranID;
       console.log("txHash =", JSON.stringify(this.txHash));

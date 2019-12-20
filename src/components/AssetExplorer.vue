@@ -52,6 +52,8 @@
 
 <script>
 import {BJumbotron, BFormInput} from 'bootstrap-vue'
+// mixins
+import {ipfs, ipfs_view} from "../mixins/ipfs";
 import ZilPayMixin from '../mixins/ZilPay'
 import LoadMixin from '../mixins/loader'
 import ViewBlockMixin from '../mixins/viewBlock'
@@ -60,24 +62,20 @@ import ProofIPFS_API_mixin from '../mixins/ProofIPFS_API_mixin'
 
 export default {
   name: 'AssetExplorer',
-  mixins: [ZilPayMixin, LoadMixin, ViewBlockMixin, ProofIPFS_API_mixin],
+  mixins: [ZilPayMixin, LoadMixin, ViewBlockMixin, ProofIPFS_API_mixin, ipfs],
   components: {
     'b-jumbotron': BJumbotron,
     'b-form-input': BFormInput
   },
 
-  // props: [contract_address],
-
   data() {
     return {
       owner_address: null,
       errorMsg: null,
-      // contract: {},
-      contract_address: "zil13jjcwrph3zrz04ua45gsz6295wycaa7r5ar4c9", // testnet
-      proof_ipfs: null,
+      // proof_ipfs: null,
       items: [],
-      ipfs_node: 'localhost',
-      ipfs_view: 'http://localhost:1111/ipfs/',  // 'https://ipfs.io/ipfs/',
+      // ipfs_node: 'localhost',
+      // ipfs_view: 'http://localhost:1111/ipfs/',  // 'https://ipfs.io/ipfs/',
     };
   },
 
@@ -97,7 +95,7 @@ export default {
       // this.startLoading('Transaction pending ...');
       const result = await this.getItemList(hex_address);
       console.log({result});
-      const tableRows = result.map(i => ({'Asset IPFS Hash' : i , documents: "<a href='" + this.ipfs_view + i + "' target='_blank'>" + "[Documents Link]" + "</a>"}));
+      const tableRows = result.map(i => ({'Asset IPFS Hash' : i , documents: "<a href='" + ipfs_view + i + "' target='_blank'>" + "[Documents Link]" + "</a>"}));
       // const tableRows = result.map(i => ({'Asset IPFS Hash' : i}));
       console.log(tableRows)
       this.items = tableRows;
