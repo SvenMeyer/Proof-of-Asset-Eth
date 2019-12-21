@@ -85,7 +85,8 @@ class ProofIPFS_API {
   }
 */
 
-const contract_address = "zil13jjcwrph3zrz04ua45gsz6295wycaa7r5ar4c9"; // testnet
+// const contract_address = "zil13jjcwrph3zrz04ua45gsz6295wycaa7r5ar4c9"; // testnet
+const contract_address = "zil1eamq2aakvhydtzc7yew22qdt400t7mc4wmykqa";  // testnet
 
 export default {
 

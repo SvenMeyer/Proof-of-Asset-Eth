@@ -9,7 +9,7 @@
 			<div class="border-style">
 				<b-form-file v-model="fileObject" ref="file-input" class="mb-2" autofocus multiple/>
 			</div>
-			<b-button class="margin-xs" variant="secondary" @click="handleOk">
+			<b-button class="margin-xs" variant="primary" @click="handleOk">
 				Upload to IPFS
 			</b-button>
 		</b-form>
@@ -54,7 +54,7 @@
 						></b-form-input>
 					</b-form-group>
 
-					<b-button @click="handleRegister" type="button" variant="primary">Submit</b-button>
+					<b-button @click="handleRegister" type="button" variant="primary">Register on Zilliqa</b-button>
 
 				</b-form-group>
 

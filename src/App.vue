@@ -82,7 +82,6 @@ export default {
     return {
       selectedNetwork: "testnet",
       networks: ["mainnet", "testnet", "private"],
-      // contract_address: "zil13jjcwrph3zrz04ua45gsz6295wycaa7r5ar4c9", // testnet
     };
   },
 
