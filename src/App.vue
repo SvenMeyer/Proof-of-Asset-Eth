@@ -22,10 +22,10 @@
 
     <!-- --------------------------------------------------------------------- -->
 
-    <b-container class="mt-4">
+    <b-container fluid>
 
-      <b-tabs content-class="mt-0">
-        <b-tab title="IPFS upload &amp; Registration" active>
+      <b-tabs content-class="mt-0" align="center">
+        <b-tab title="IPFS upload &amp; Registration" active class="mx-auto" style="width: 896px;">
           <ipfs-upload-register/>
         </b-tab>
         <b-tab title="Asset Explorer">
