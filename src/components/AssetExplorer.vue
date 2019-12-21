@@ -19,6 +19,10 @@
 
     <b-table bordered striped hover :items="items">
 
+      <template v-slot:cell(block_number)="block">
+        <span v-html="block.value"></span>
+      </template>
+
       <template v-slot:cell(documents)="data">
         <span v-html="data.value"></span>
       </template>
@@ -72,10 +76,8 @@ export default {
     return {
       owner_address: null,
       errorMsg: null,
-      // proof_ipfs: null,
       items: [],
-      // ipfs_node: 'localhost',
-      // ipfs_view: 'http://localhost:1111/ipfs/',  // 'https://ipfs.io/ipfs/',
+
     };
   },
 
@@ -93,12 +95,40 @@ export default {
       console.log("this.owner_address =", hex_address);
 
       // this.startLoading('Transaction pending ...');
-      const result = await this.getItemList(hex_address);
-      console.log({result});
-      const tableRows = result.map(i => ({'Asset IPFS Hash' : i , documents: "<a href='" + ipfs_view + i + "' target='_blank'>" + "[Documents Link]" + "</a>"}));
-      // const tableRows = result.map(i => ({'Asset IPFS Hash' : i}));
-      console.log(tableRows)
+      const response_items = await this.getItemList(hex_address);
+      console.log({response_items});
+
+      const tableRows = response_items.map(i => ({
+        Asset_IPFS_Hash : i ,
+        asset_serial : "",
+        block_number: "",
+        time_stamp   : "",
+        product_name : "",
+        custodian   : "",
+        documents: "<a href='" + ipfs_view + i + "' target='_blank'>" + "[Documents Link]" + "</a>"}));
+
       this.items = tableRows;
+      console.log({tableRows})
+
+      this.items.forEach(async row => {
+        console.log({row})
+        const reg_info = await this.getRegistration(row.Asset_IPFS_Hash);
+        console.log({reg_info});
+        const blocknumber = reg_info[1];
+        const metadata = JSON.parse(reg_info[2]);
+        console.log({metadata});
+        const response_blocktime = await this.getBlockTime(blocknumber);
+        const ms = response_blocktime.result.header.Timestamp;
+        row.asset_serial = metadata.asset_serial;
+        const block_link = this.explore(blocknumber, 'block');
+        row.block_number = "<a href='" + block_link + "' target='_blank'>" + blocknumber + "</a>"
+        row.time_stamp   = new Date(Math.round(ms/1000))  // .toISOString();
+        row.product_name = metadata.product_name;
+        row.custodian    = metadata.custodian;
+
+        console.log({row});
+      })
+
       // this.endLoading();
     },
 

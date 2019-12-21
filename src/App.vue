@@ -25,7 +25,7 @@
     <b-container fluid>
 
       <b-tabs content-class="mt-0" align="center">
-        <b-tab title="IPFS upload &amp; Registration" active class="mx-auto" style="width: 896px;">
+        <b-tab title="IPFS upload &amp; Registration" class="mx-auto" style="width: 896px;" active>
           <ipfs-upload-register/>
         </b-tab>
         <b-tab title="Asset Explorer">

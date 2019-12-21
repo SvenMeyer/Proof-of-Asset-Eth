@@ -67,22 +67,6 @@ class ProofIPFS_API {
     return state ? parseInt(state._balance) : 0;
   }
 
-  async getRegistration(ipfs_cid) {
-    let reg_info = [];
-    if (this.chain_id != 111) {
-      // this is for the real Zilliqa test and main blockchain
-      let state = await this.proof_ipfs.getSubState("ipfsInventory", [
-        ipfs_cid
-      ]);
-      reg_info = state ? state.ipfsInventory[ipfs_cid].arguments : [];
-    } else {
-      // workaround to get it to work on kaya local network
-      const full_state = await this.proof_ipfs.getState();
-      const item = full_state.ipfsInventory.find(o => o.key == ipfs_cid);
-      reg_info = item ? item.val.arguments : [];
-    }
-    return reg_info;
-  }
 */
 
 // const contract_address = "zil13jjcwrph3zrz04ua45gsz6295wycaa7r5ar4c9"; // testnet
@@ -94,11 +78,16 @@ export default {
 
   data() {
     return {
-
+			chain_id : 333,  // testnet
     };
   },
 
   methods: {
+
+		async getBlockTime(blocknumber) {
+			const zilliqa = window.zilPay;
+			return zilliqa.blockchain.getTxBlock(blocknumber);
+		},
 
 		async getItemList(hex_address) {
 			console.log("getItemList :")
@@ -120,6 +109,26 @@ export default {
 				item_list = reg_info ? reg_info.val : [];
 			}
 			return item_list;
+		},
+
+		async getRegistration(ipfs_cid) {
+		const zilliqa = window.zilPay;
+		this.proof_ipfs = zilliqa.contracts.at(contract_address);
+			let reg_info = [];
+			// const chain_id = await zilliqa.network.GetNetworkId();  // returns String
+			if (this.chain_id != 111) {
+				// this is for the real Zilliqa test and main blockchain
+				let state = await this.proof_ipfs.getSubState("ipfsInventory", [
+					ipfs_cid
+				]);
+				reg_info = state ? state.ipfsInventory[ipfs_cid].arguments : [];
+			} else {
+				// workaround to get it to work on kaya local network
+				const full_state = await this.proof_ipfs.getState();
+				const item = full_state.ipfsInventory.find(o => o.key == ipfs_cid);
+				reg_info = item ? item.val.arguments : [];
+			}
+			return reg_info;
 		},
 
 		async getPrice_fromContract() {
