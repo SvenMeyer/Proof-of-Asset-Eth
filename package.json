@@ -1,6 +1,6 @@
 {
-  "name": "zilliqa_poa_exlorer",
-  "version": "0.1.0",
+  "name": "zilliqa_proof_of_asset_client",
+  "version": "1.0.0",
   "author": "Sven Meyer",
   "private": true,
   "scripts": {

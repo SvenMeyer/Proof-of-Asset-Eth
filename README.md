@@ -1,4 +1,4 @@
-# Zilliqa_ProofIPFS_Explorer
+# Zilliqa Proof of Asset - Client
 
 ## Project setup
 ```
