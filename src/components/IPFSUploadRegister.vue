@@ -96,12 +96,19 @@ import {ipfs} from "../mixins/ipfs";
 import ZilPayMixin from '../mixins/ZilPay'
 import LoadMixin from '../mixins/loader'
 import ViewBlockMixin from '../mixins/viewBlock'
-import ProofIPFS_API_mixin from '../mixins/ProofIPFS_API_mixin'
+
+// standard imports
+// import {Zilliqa} from '@zilliqa-js/zilliqa';
+import {networks} from '../lib/global_config';
+import {ProofIPFS_API} from '../lib/ProofIPFS_API';
 
 
 export default {
+
   name: 'AssetExplorer',
-  mixins: [ZilPayMixin, LoadMixin, ViewBlockMixin, ProofIPFS_API_mixin],
+
+  mixins: [ZilPayMixin, LoadMixin, ViewBlockMixin],
+
   components: {
     'b-jumbotron' : BJumbotron,
     'b-form-input': BFormInput
@@ -176,9 +183,23 @@ export default {
 			console.log("handleRegister : form =", this.form);
 			console.log("ipfs_hash =", this.ipfs_hash);
 			const metadata = JSON.stringify(this.form);
-			console.log("metadata  =", metadata);
+      console.log("metadata  =", metadata);
 
-			const callTx = await this.registerOwnership(this.ipfs_hash, metadata);
+      const zilliqa = window.zilPay;
+      const zilPayNetwork = zilliqa.wallet.net;
+      console.log({zilPayNetwork})
+      const network = networks[zilPayNetwork];
+
+      // TODO : set selectedNetwork in NavBar to network
+
+      console.log("network.host_url =", network.host_url);
+
+      console.log("network.contract_address =", network.contract_address);
+      const deployedContract = zilliqa.contracts.at(network.contract_address);
+
+      const proof_ipfs = new ProofIPFS_API(deployedContract, network);
+
+			const callTx = await proof_ipfs.registerOwnership(this.ipfs_hash, metadata);
 
       this.txHash = callTx.TranID;
       console.log("txHash =", JSON.stringify(this.txHash));
@@ -187,7 +208,7 @@ export default {
         return new Promise(resolve => setTimeout(resolve, ms));
       }
 
-			const zilliqa = window.zilPay;
+			// const zilliqa = window.zilPay;
       const now = Date.now();
       let pending = true;
       while (pending) {

@@ -29,7 +29,7 @@
           <ipfs-upload-register/>
         </b-tab>
         <b-tab title="Asset Explorer">
-          <asset-explorer/>
+          <asset-explorer :selectedNetwork="selectedNetwork"/>
         </b-tab>
       </b-tabs>
 

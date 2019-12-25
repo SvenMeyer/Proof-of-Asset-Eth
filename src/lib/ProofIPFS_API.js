@@ -26,7 +26,7 @@ class ProofIPFS_API {
   // https://github.com/Zilliqa/Zilliqa-JavaScript-Library/blob/dev/examples/queryState.js
 
   // receipt = callTx.txParams.receipt
-  codeFromReceipt(receipt) {
+  codeFromReceipt(receipt) {  // static - TODO
     let code;
     const p = receipt.event_logs[0].params;
     if (p) {
@@ -160,6 +160,6 @@ class ProofIPFS_API {
   }
 }
 
-module.exports = { ProofIPFS_API, myGasPrice };
+// module.exports = { ProofIPFS_API, myGasPrice };
 // ES6 browser
-// export {ProofIPFS_API, myGasPrice};
+export {ProofIPFS_API, myGasPrice};

@@ -1,6 +1,6 @@
 {
-  "name": "zilliqa_proof_of_asset_client",
-  "version": "1.0.0",
+  "name": "zilliqa_proof_of_asset",
+  "version": "1.1.0",
   "author": "Sven Meyer",
   "private": true,
   "scripts": {
@@ -9,6 +9,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@zilliqa-js/zilliqa": "^0.8.8",
     "bootstrap-vue": "^2.1.0",
     "core-js": "^3.6.0",
     "ipfs-http-client": "^40.1.0",
