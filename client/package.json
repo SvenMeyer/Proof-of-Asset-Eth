@@ -1,18 +1,17 @@
 {
-  "name": "zilliqa_proof_of_asset",
-  "version": "1.1.0",
+  "name": "poa-eth-vue",
+  "version": "1.0",
   "author": "Sven Meyer",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint" : "vue-cli-service lint"
   },
   "dependencies": {
-    "@zilliqa-js/zilliqa": "^0.8.8",
     "bootstrap-vue": "^2.1.0",
     "core-js": "^3.6.0",
-    "ipfs-http-client": "^40.1.0",
+    "ipfs-http-client": "~41",
     "jquery": "^3.4.1",
     "vue": "^2.6.11",
     "vue-json-tree-view": "^2.1.4",
