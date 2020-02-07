@@ -18,13 +18,29 @@
  *
  */
 
-// const HDWalletProvider = require('truffle-hdwallet-provider');
+const HDWalletProvider = require('truffle-hdwallet-provider');
+
 // const infuraKey = "fj4jll3k.....";
 //
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 
+// default mnemonic of Ganache GUI
+const mnemonic = "tomorrow draft giggle design purchase daring goddess cute inquiry giant thumb journey";
+
+// default mnemonic of Truffle develop
+const mnemonic_truffle = "pill few wear village tower boat error taste awful panda entire limb";
+
+const path = require("path");
+
 module.exports = {
+
+  plugins: ["truffle-security"],
+
+  // See <http://truffleframework.com/docs/advanced/configuration>
+  // to customize your Truffle configuration!
+  contracts_build_directory: path.join(__dirname, "client/src/contracts"),
+
   /**
    * Networks define how you connect to your ethereum client and let you set the
    * defaults web3 uses to send transactions. If you don't specify one truffle
@@ -36,17 +52,31 @@ module.exports = {
    */
 
   networks: {
-    // Useful for testing. The `development` name is special - truffle uses it by default
+    // Useful for testing. The `develop` name is special - truffle uses it by default
     // if it's defined here and no other network is specified at the command line.
     // You should run a client (like ganache-cli, geth or parity) in a separate terminal
     // tab if you use this network and you must also set the `host`, `port` and `network_id`
     // options below to some value.
     //
-    // development: {
-    //  host: "127.0.0.1",     // Localhost (default: none)
-    //  port: 8545,            // Standard Ethereum port (default: none)
-    //  network_id: "*",       // Any network (default: none)
-    // },
+    // The default network name needs to be 'develop', not 'development,
+    // otherwise 'truffle test' does not work.
+    develop: {
+      host: "127.0.0.1",     // Localhost (default: none)
+      port: 8545,            // Truffle default port
+      network_id: "*",       // Any network (default: none)
+    },
+
+    localhost_7545: {
+      host: "127.0.0.1",
+      port: 7545,            // Ganache GUI default port
+      network_id: "*",       // Any network (default: none)
+    },
+
+    gui: {
+      host: "127.0.0.1",
+      port: 7545,            // Ganache GUI default port
+      network_id: "*",       // Any network (default: none)
+    },
 
     // Another network with more advanced options...
     // advanced: {
@@ -69,12 +99,37 @@ module.exports = {
       // skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
     // },
 
-    // Useful for private networks
-    // private: {
-      // provider: () => new HDWalletProvider(mnemonic, `https://network.io`),
-      // network_id: 2111,   // This network is yours, in the cloud.
-      // production: true    // Treats this network as if it was a public net. (default: false)
-    // }
+    // private network
+    // npm install truffle-hdwallet-provider
+    // https://github.com/trufflesuite/truffle/tree/develop/packages/truffle-hdwallet-provider
+
+    gui_HD: {
+      // must be a thunk, otherwise truffle commands may hang in CI
+      provider: () => new HDWalletProvider(mnemonic, 'http://127.0.0.1:7545'),
+      network_id: '5777',
+      // shareNonce:false,
+      // websockets: true,	// enabled to use the confirmations listener or to hear Events using .on or .once
+      // production: true,	// Treats this network as if it was a public net. (default: false)
+    },
+
+    truffle_HD: {
+      // must be a thunk, otherwise truffle commands may hang in CI
+      provider: () => new HDWalletProvider(mnemonic_truffle, 'http://127.0.0.1:9545'),
+      network_id: '*',
+      // shareNonce:false,
+      // websockets: true,	// enabled to use the confirmations listener or to hear Events using .on or .once
+      // production: true,	// Treats this network as if it was a public net. (default: false)
+    },
+
+    remote_gui_HD: {
+      // must be a thunk, otherwise truffle commands may hang in CI
+      provider: () => new HDWalletProvider(mnemonic, 'http://yepo1:7545'),
+      network_id: '5777',
+      // shareNonce:false,
+      // websockets: true,	// enabled to use the confirmations listener or to hear Events using .on or .once
+      // production: true,	// Treats this network as if it was a public net. (default: false)
+    }
+
   },
 
   // Set default mocha options here, use special reporters etc.
@@ -88,10 +143,10 @@ module.exports = {
       // version: "0.5.1",    // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       // settings: {          // See the solidity docs for advice about optimization and evmVersion
-      //  optimizer: {
-      //    enabled: false,
-      //    runs: 200
-      //  },
+        optimizer: {
+        enabled: true,
+        runs: 200
+        },
       //  evmVersion: "byzantium"
       // }
     }
