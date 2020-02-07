@@ -125,3 +125,5 @@ typings/
 
 # next.js build output
 .next
+
+.openzeppelin/.session
