@@ -1,0 +1,31 @@
+{
+  "name": "poa-eth-vue",
+  "version": "1.0.0",
+  "description": "Proof-of-Asset & mint token & Ethereum & Vue & IPFS",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SvenMeyer/Proof-of-Asset-Eth.git"
+  },
+  "keywords": [
+    "Ethereum",
+    "Vue",
+    "IPFS",
+    "Bootstrap"
+  ],
+  "author": "Sven Meyer",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/SvenMeyer/Proof-of-Asset-Eth/issues"
+  },
+  "homepage": "https://github.com/SvenMeyer/Proof-of-Asset-Eth#readme",
+  "dependencies": {
+    "@openzeppelin/contracts": "^2.5.0"
+  }
+}
