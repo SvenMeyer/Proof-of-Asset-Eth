@@ -26,6 +26,10 @@
   },
   "homepage": "https://github.com/SvenMeyer/Proof-of-Asset-Eth#readme",
   "dependencies": {
-    "@openzeppelin/contracts": "^2.5.0"
+    "@openzeppelin/contracts": "^2.5.0",
+    "@truffle/hdwallet-provider": "^1.0.30"
+  },
+  "devDependencies": {
+    "@openzeppelin/cli": "^2.6.0"
   }
 }
