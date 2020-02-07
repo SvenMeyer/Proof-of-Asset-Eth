@@ -15,7 +15,8 @@
     "ipfs-http-client": "^40.1.0",
     "jquery": "^3.4.1",
     "vue": "^2.6.11",
-    "vue-json-tree-view": "^2.1.4"
+    "vue-json-tree-view": "^2.1.4",
+    "web3": "^1.2.6"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.1.1",
