@@ -6,6 +6,11 @@ pragma experimental ABIEncoderV2;   // required to pass structs as function para
 /// @notice only implements very basic functionality (add, retrieve)
 /// @dev functions passing structs can be tested using the experimental ABIEncoderV2
 
+// Import Ownable from the OpenZeppelin Contracts library
+// append 'onlyOwner' to control access to function
+// import "@openzeppelin/contracts/ownership/Ownable.sol";
+// contract ProofOfAsset is Ownable {
+
 contract ProofOfAsset {
 
 	address public owner;
@@ -41,11 +46,13 @@ contract ProofOfAsset {
 	struct Item {
 		uint     id;               // index of item starting with 0
 		uint     blockTimestamp;   // timestamp of registration
+		uint     productAmount;    // amount of product
 		uint     mintAmount;       // number of token minted for this registration
 		address  tokenContract;    // address of token to mint
 		address  registrar;        // registrar of item
 		string   fileHash;         // hash of file (= IPFS storage location)
 		string   adrCloudStorage;  // backup / 2nd cloud storage location
+		string   productName;      // name of product
 		string   metadata;         // (optional) additional metadata
 	}
 
@@ -76,12 +83,14 @@ contract ProofOfAsset {
 	/// @dev add a new item to the collection
 	/// @dev emits eventAddItem event
 
-	function addItem(string memory _fileHash,
-                     string memory _adrCloudStorage,
-                     string memory _metadata,
-					 address _tokenContract,
-                     uint    _mintAmount)
-                     public {
+	function addItem( string memory _fileHash,
+                    string memory _adrCloudStorage,
+										string memory _productName,
+										uint   _productAmount,
+                    string memory _metadata,
+										address _tokenContract,
+                    uint    _mintAmount)
+                    public {
 		// if parameter not too long
 		// if item does not already exist
 		// if payment >= (price * mint_amount)
@@ -89,6 +98,8 @@ contract ProofOfAsset {
 			id              : itemCount,
 			registrar       : msg.sender,  // tx.origin ? https://solidity.readthedocs.io/en/v0.5.3/security-considerations.html#tx-origin
 			blockTimestamp  : block.timestamp,
+			productName     : _productName,
+			productAmount   : _productAmount,
 			tokenContract   : _tokenContract,
 			mintAmount      : _mintAmount,
 			fileHash        : _fileHash,
