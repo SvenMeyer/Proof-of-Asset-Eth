@@ -1,14 +1,16 @@
 {
   "name": "poa-eth-vue",
-  "version": "1.0",
+  "version": "1.0.0",
   "author": "Sven Meyer",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint" : "vue-cli-service lint"
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@zilliqa-js/util": "^0.8.8",
+    "@zilliqa-js/zilliqa": "^0.8.8",
     "bootstrap-vue": "^2.1.0",
     "core-js": "^3.6.0",
     "ipfs-http-client": "~41",

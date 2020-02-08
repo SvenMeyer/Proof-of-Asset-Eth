@@ -3,7 +3,7 @@
 
     <b-navbar toggleable="lg" type="dark" variant="dark">
 
-      <b-navbar-brand href="#">Zilliqa ProofIPFS Explorer</b-navbar-brand>
+      <b-navbar-brand href="#">Proof-of-Asset &amp; Token mint</b-navbar-brand>
 
       <!-- Right aligned nav items -->
       <b-navbar-nav class="ml-auto">
@@ -34,45 +34,21 @@
       </b-tabs>
 
     </b-container>
-
-    <!-- --------------------------------------------------------------------- -->
-
-    <b-modal :ref="code.notZilPay"
-             hide-footer
-             title="ZilPay is not installed!">
-      <b-row class="justify-content-md-center">
-        <img src="/img/home.png">
-      </b-row>
-
-      <b-row class="justify-content-md-center">
-        <a href="https://chrome.google.com/webstore/detail/zilpay/klnaejjgbibmhlephnhpmaofohgkpgkd"
-           target="_blank"
-           class="btn btn-success m-2">Chrome</a>
-        <a href="https://addons.mozilla.org/en-GB/firefox/addon/zilpay/"
-           target="_blank"
-           class="btn btn-success m-2">Firefox</a>
-      </b-row>
-    </b-modal>
-
-    <b-modal :ref="code.notEnable"
-             hide-footer
-             title="ZilPay is not enabled !">
-      <b-row class="justify-content-md-center">
-        <img src="/img/lock.png">
-      </b-row>
-    </b-modal>
   </div>
 </template>
 
 <script>
 import IPFSUploadRegister from './components/IPFSUploadRegister'
 import AssetExplorer from './components/AssetExplorer'
-import ZilPayMixin from './mixins/ZilPay'
+// import ZilPayMixin from './mixins/ZilPay'
 import LoadMixin from './mixins/loader'
+
+// import ProofOfAssetContract from "./contracts/ProofOfAsset.json";
+// import getWeb3 from "./lib/getWeb3";
 
 export default {
   name: 'app',
-  mixins: [ZilPayMixin, LoadMixin],
+  mixins: [LoadMixin],
   components: {
     'ipfs-upload-register': IPFSUploadRegister,
     'asset-explorer':    AssetExplorer,
@@ -93,19 +69,15 @@ export default {
 
 
   mounted() {
-    window.addEventListener("load", async () => {
-      this.endLoading();
-      const test = await this.zilpayTest();
-      console.log("zilpayTest : ", test);
 
-      if (test === this.code.notZilPay) {
-        this.$refs[this.code.notZilPay].show();
-      } else if (test === this.code.notEnable) {
-        this.$refs[this.code.notEnable].show();
-      } else if (test === this.code.notConnect) {
-        await window.zilPay.wallet.connect();
-      }
-    });
+    /*
+    window.addEventListener("load", async () => {
+
+*/
+  this.endLoading();
+  console.log("App.vue : mounted");
+
+
   }
 }
 </script>

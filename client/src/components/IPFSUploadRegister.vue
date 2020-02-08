@@ -1,6 +1,9 @@
 <template>
   <b-jumbotron>
-    <h1>IPFS Upload &amp; Zilliqa Registration</h1>
+    <!--
+    <h3>IPFS Upload - Ethereum Blockchain Registration - Token mint</h3>
+    <p></p>
+    -->
     <p class="lead">Upload document to IPFS:</p>
 
     <small class="lead text-danger">{{errorMsg}}</small>
@@ -54,7 +57,7 @@
 						></b-form-input>
 					</b-form-group>
 
-					<b-button @click="handleRegister" type="button" variant="primary">Register on Zilliqa</b-button>
+					<b-button @click="handleRegister" type="button" variant="primary">Register on Blockchain</b-button>
 
 				</b-form-group>
 
@@ -64,28 +67,6 @@
       <p>txMessage : {{ txMessage }}</p>
 
 		</div>
-
-    <!--
-    <b-modal :ref="isDeploy"
-             hide-footer
-             title="Contract created">
-      <h6>Contract:
-        <a :href="explore(contract.ContractAddress, 'address')"
-           class="text-info"
-           target="_blank">{{contract.ContractAddress}}</a>
-      </h6>
-      <h6>owner:
-        <a :href="explore(contract.owner, 'address')"
-           class="text-info"
-           target="_blank">{{contract.owner}}</a></h6>
-      <a class="btn btn-info"
-         :href="explore(contract.id)"
-         target="_blank">show on ViewBlock</a>
-      <hr>
-      <tree-view :data="contract.init" :options="treeViewOptions"></tree-view>
-    </b-modal>
-    -->
-
   </b-jumbotron>
 </template>
 
@@ -93,21 +74,23 @@
 import {BJumbotron, BFormInput} from 'bootstrap-vue'
 // mixins
 import {ipfs} from "../mixins/ipfs";
-import ZilPayMixin from '../mixins/ZilPay'
+// import ZilPayMixin from '../mixins/ZilPay'
 import LoadMixin from '../mixins/loader'
 import ViewBlockMixin from '../mixins/viewBlock'
 
 // standard imports
 // import {Zilliqa} from '@zilliqa-js/zilliqa';
 import {networks} from '../lib/global_config';
-import {ProofIPFS_API} from '../lib/ProofIPFS_API';
+// import {ProofIPFS_API} from '../lib/ProofIPFS_API';
 
+import ProofOfAssetContract from "../contracts/ProofOfAsset.json";
+import getWeb3 from "../lib/getWeb3"
 
 export default {
 
   name: 'AssetExplorer',
 
-  mixins: [ZilPayMixin, LoadMixin, ViewBlockMixin],
+  mixins: [LoadMixin, ViewBlockMixin],
 
   components: {
     'b-jumbotron' : BJumbotron,
@@ -185,6 +168,48 @@ export default {
 			const metadata = JSON.stringify(this.form);
       console.log("metadata  =", metadata);
 
+
+      try {
+        // Get network provider and web3 instance.
+        console.log("getting web3 ...")
+        const web3 = await getWeb3();
+        console.log({web3});
+        console.log("web3.version = ", web3.version);
+
+        // Get the user's accounts.
+        const accounts = await web3.eth.getAccounts();
+        console.log({accounts});
+
+        // Get the contract
+        const networkId = await web3.eth.net.getId();
+        console.log({networkId})
+        const deployedNetwork = ProofOfAssetContract.networks[networkId];
+        console.log({deployedNetwork})
+        const contract = new web3.eth.Contract(
+          ProofOfAssetContract.abi,  "0xcfd314B14cAB8c3e36852A249EdcAa1D3Dd05055"
+          // deployedNetwork &&
+          // deployedNetwork.address
+        );
+        console.log({contract});
+        // console.log("this.setState({ web3, accounts, contract });"); // TODO
+
+        // https://ethereum.stackexchange.com/questions/54507/how-to-call-a-deployed-contract-function
+
+        let price = await contract.methods.getPrice().call();
+        console.log({price});
+
+        let n = await contract.methods.getNumberOfItems(accounts[0]).call();
+        console.log({n});
+
+        let item  = await contract.methods.getItemStructByIndex(0).call();
+        console.log(item);
+
+      } catch (error) {
+        alert(`Failed to load web3, accounts, or contract. Check console for details.`);
+        console.error(error);
+      }
+
+      /*
       const zilliqa = window.zilPay;
       const zilPayNetwork = zilliqa.wallet.net;
       console.log({zilPayNetwork})
@@ -203,6 +228,7 @@ export default {
 
       this.txHash = callTx.TranID;
       console.log("txHash =", JSON.stringify(this.txHash));
+      */
 
       function timeout(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -210,10 +236,12 @@ export default {
 
 			// const zilliqa = window.zilPay;
       const now = Date.now();
+      console.log({now});
       let pending = true;
       while (pending) {
         await timeout(2000);
 
+        /*
         zilliqa.blockchain.getTransaction(this.txHash)
         .then(status => {
           console.log("txStatus =", JSON.stringify(status));
@@ -223,27 +251,12 @@ export default {
 					this.txMessage = Math.round((Date.now() - now)/1000) + ' %';
 					console.log({reject_status});
         });
+        */
+
       }
 		},
 
-
-/*
-      try {
-        this.contract = await this.deployFungibleToken(
-          this.owner_address,
-          this.form.totalSupply,
-          this.form.decimals,
-          this.form.name,
-          this.form.symbol
-        );
-        await this.txObservable(this.contract.id);
-        this.$refs[this.isDeploy].show();
-      } catch(err) {
-        this.errorMsg = err.message || err;
-      }
-*/
-
-
+    /*
     observableAccount() {
       setTimeout(() => {
         this.owner_address = window.zilPay.wallet.defaultAccount.bech32;
@@ -252,12 +265,15 @@ export default {
         });
       }, 1000);
     }
+    */
 
   },
 
   mounted() {
     try {
-      this.observableAccount();
+      // this.observableAccount();
+      console.log("IPFSUploadRegister.vue : mounted")
+      console.log(networks.local.host_url);
     } catch(err) {
       /* eslint-disable */
     }
