@@ -26,7 +26,8 @@ const HDWalletProvider = require('@truffle/hdwallet-provider');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 
 // default mnemonic of Ganache GUI
-const mnemonic = "tomorrow draft giggle design purchase daring goddess cute inquiry giant thumb journey";
+const mnemonic_tomorrow = "tomorrow draft giggle design purchase daring goddess cute inquiry giant thumb journey";
+const mnemonic_candy    = "candy grid episode twelve survey average space piano puzzle tourist hero upon"
 
 // default mnemonic of Truffle develop
 const mnemonic_truffle = "pill few wear village tower boat error taste awful panda entire limb";
@@ -60,9 +61,10 @@ module.exports = {
     //
     // The default network name needs to be 'develop', not 'development,
     // otherwise 'truffle test' does not work.
+
     develop: {
       host: "127.0.0.1",     // Localhost (default: none)
-      port: 8545,            // Truffle default port
+      port: 7545,            // Truffle default port
       network_id: "*",       // Any network (default: none)
     },
 
@@ -72,9 +74,9 @@ module.exports = {
       network_id: "*",       // Any network (default: none)
     },
 
-    gui: {
+    localhost_8545: {
       host: "127.0.0.1",
-      port: 7545,            // Ganache GUI default port
+      port: 8545,            // Ganache GUI default port
       network_id: "*",       // Any network (default: none)
     },
 
@@ -100,19 +102,28 @@ module.exports = {
     // },
 
     // private network
-    // npm install truffle-hdwallet-provider
-    // https://github.com/trufflesuite/truffle/tree/develop/packages/truffle-hdwallet-provider
+    // npm install @truffle/hdwallet-provider
+    // https://github.com/trufflesuite/truffle/tree/master/packages/hdwallet-provider#readme
 
-    gui_HD: {
+    gg: {
       // must be a thunk, otherwise truffle commands may hang in CI
-      provider: () => new HDWalletProvider(mnemonic, 'http://127.0.0.1:7545'),
+      provider: () => new HDWalletProvider(mnemonic_tomorrow, 'http://127.0.0.1:7545'),
       network_id: '5777',
       // shareNonce:false,
       // websockets: true,	// enabled to use the confirmations listener or to hear Events using .on or .once
       // production: true,	// Treats this network as if it was a public net. (default: false)
     },
 
-    truffle_HD: {
+    gg_candy: {
+      // must be a thunk, otherwise truffle commands may hang in CI
+      provider: () => new HDWalletProvider(mnemonic_candy, 'http://127.0.0.1:7545'),
+      network_id: '5777',
+      // shareNonce:false,
+      // websockets: true,	// enabled to use the confirmations listener or to hear Events using .on or .once
+      // production: true,	// Treats this network as if it was a public net. (default: false)
+    },
+
+    truffle: {
       // must be a thunk, otherwise truffle commands may hang in CI
       provider: () => new HDWalletProvider(mnemonic_truffle, 'http://127.0.0.1:9545'),
       network_id: '*',
@@ -120,15 +131,6 @@ module.exports = {
       // websockets: true,	// enabled to use the confirmations listener or to hear Events using .on or .once
       // production: true,	// Treats this network as if it was a public net. (default: false)
     },
-
-    remote_gui_HD: {
-      // must be a thunk, otherwise truffle commands may hang in CI
-      provider: () => new HDWalletProvider(mnemonic, 'http://yepo1:7545'),
-      network_id: '5777',
-      // shareNonce:false,
-      // websockets: true,	// enabled to use the confirmations listener or to hear Events using .on or .once
-      // production: true,	// Treats this network as if it was a public net. (default: false)
-    }
 
   },
 
