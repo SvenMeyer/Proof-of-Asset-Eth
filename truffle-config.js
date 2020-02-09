@@ -136,21 +136,21 @@ module.exports = {
     },
 
     kovan: {
-      provider: new HDWalletProvider(mnemonic_dev, 'https://kovan.infura.io/v3/' + infuraKey),
+      provider: () => new HDWalletProvider(mnemonic_dev, 'https://kovan.infura.io/v3/' + infuraKey),
       network_id: '*',
       gas: 4500000,
       gasPrice: 25000000000
     },
 
     rinkeby: {
-      provider: new HDWalletProvider(mnemonic_dev, 'https://rinkeby.infura.io/v3/' + infuraKey),
+      provider: () => new HDWalletProvider(mnemonic_dev, 'https://rinkeby.infura.io/v3/' + infuraKey),
       network_id: '*',
       gas: 4500000,
       gasPrice: 25000000000
     },
 
     mainnet: {
-      provider: new HDWalletProvider(mnemonic_mainnet, 'https://mainnet.infura.io/v3/' + infuraKey),
+      provider: () => new HDWalletProvider(mnemonic_mainnet, 'https://mainnet.infura.io/v3/' + infuraKey),
       network_id: '*',
       gas: 4500000,
       gasPrice: 25000000000
