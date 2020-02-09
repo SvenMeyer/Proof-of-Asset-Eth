@@ -20,17 +20,19 @@
 
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 
-// const infuraKey = "fj4jll3k.....";
-//
+const infuraKey = "fd09fff3423341508083acb38eefb499";
+
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 
-// default mnemonic of Ganache GUI
-const mnemonic_tomorrow = "tomorrow draft giggle design purchase daring goddess cute inquiry giant thumb journey";
-const mnemonic_candy    = "candy grid episode twelve survey average space piano puzzle tourist hero upon"
+const mnemonic_mainnet = process.env.MNEMONIC;
 
-// default mnemonic of Truffle develop
-const mnemonic_truffle = "pill few wear village tower boat error taste awful panda entire limb";
+// default mnemonic of Ganache GUI
+const mnemonic_dev         = "tomorrow draft giggle design purchase daring goddess cute inquiry giant thumb journey";
+const mnemonic_dev_candy   = "candy grid episode twelve survey average space piano puzzle tourist hero upon";
+const mnemonic_dev_truffle = "pill few wear village tower boat error taste awful panda entire limb";
+
+const infura_project_id = '';
 
 const path = require("path");
 
@@ -40,6 +42,7 @@ module.exports = {
 
   // See <http://truffleframework.com/docs/advanced/configuration>
   // to customize your Truffle configuration!
+
   contracts_build_directory: path.join(__dirname, "client/src/contracts"),
 
   /**
@@ -53,28 +56,25 @@ module.exports = {
    */
 
   networks: {
-    // Useful for testing. The `develop` name is special - truffle uses it by default
+    // Useful for testing. The `development` name is special - truffle uses it by default
     // if it's defined here and no other network is specified at the command line.
     // You should run a client (like ganache-cli, geth or parity) in a separate terminal
     // tab if you use this network and you must also set the `host`, `port` and `network_id`
     // options below to some value.
-    //
-    // The default network name needs to be 'develop', not 'development,
-    // otherwise 'truffle test' does not work.
 
-    develop: {
-      host: "127.0.0.1",     // Localhost (default: none)
-      port: 7545,            // Truffle default port
-      network_id: "*",       // Any network (default: none)
+    development: {
+     host: "127.0.0.1",     // Localhost (default: none)
+     port: 8545,            // Standard Ethereum port (default: none)
+     network_id: "*",       // Any network (default: none)
     },
 
-    localhost_7545: {
+    local_7545: {
       host: "127.0.0.1",
       port: 7545,            // Ganache GUI default port
       network_id: "*",       // Any network (default: none)
     },
 
-    localhost_8545: {
+    local_8545: {
       host: "127.0.0.1",
       port: 8545,            // Ganache GUI default port
       network_id: "*",       // Any network (default: none)
@@ -91,32 +91,27 @@ module.exports = {
     // },
 
     // Useful for deploying to a public network.
-    // NB: It's important to wrap the provider as a function.
-    // ropsten: {
-      // provider: () => new HDWalletProvider(mnemonic, `https://ropsten.infura.io/v3/YOUR-PROJECT-ID`),
-      // network_id: 3,       // Ropsten's id
-      // gas: 5500000,        // Ropsten has a lower block limit than mainnet
-      // confirmations: 2,    // # of confs to wait between deployments. (default: 0)
-      // timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
-      // skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
-    // },
+    // // It's important to wrap the provider as a function, otherwise truffle commands may hang in CI
 
-    // private network
-    // npm install @truffle/hdwallet-provider
-    // https://github.com/trufflesuite/truffle/tree/master/packages/hdwallet-provider#readme
+    // Useful for private networks
+    // private: {
+      // provider: () => new HDWalletProvider(mnemonic, `https://network.io`),
+      // network_id: 2111,   // This network is yours, in the cloud.
+      // production: true    // Treats this network as if it was a public net. (default: false)
+    // }
 
+    // Ganache GUI
     gg: {
-      // must be a thunk, otherwise truffle commands may hang in CI
-      provider: () => new HDWalletProvider(mnemonic_tomorrow, 'http://127.0.0.1:7545'),
+      provider: () => new HDWalletProvider(mnemonic_dev, 'http://127.0.0.1:7545'),
       network_id: '5777',
       // shareNonce:false,
       // websockets: true,	// enabled to use the confirmations listener or to hear Events using .on or .once
       // production: true,	// Treats this network as if it was a public net. (default: false)
     },
 
+    // Gananche CLI
     gg_candy: {
-      // must be a thunk, otherwise truffle commands may hang in CI
-      provider: () => new HDWalletProvider(mnemonic_candy, 'http://127.0.0.1:7545'),
+      provider: () => new HDWalletProvider(mnemonic_dev_candy, 'http://127.0.0.1:7545'),
       network_id: '5777',
       // shareNonce:false,
       // websockets: true,	// enabled to use the confirmations listener or to hear Events using .on or .once
@@ -124,13 +119,42 @@ module.exports = {
     },
 
     truffle: {
-      // must be a thunk, otherwise truffle commands may hang in CI
-      provider: () => new HDWalletProvider(mnemonic_truffle, 'http://127.0.0.1:9545'),
+      provider: () => new HDWalletProvider(mnemonic_dev_truffle, 'http://127.0.0.1:9545'),
       network_id: '*',
       // shareNonce:false,
       // websockets: true,	// enabled to use the confirmations listener or to hear Events using .on or .once
       // production: true,	// Treats this network as if it was a public net. (default: false)
     },
+
+    ropsten: {
+      provider: () => new HDWalletProvider(mnemonic_dev, `https://ropsten.infura.io/v3/` + infuraKey),
+      network_id: 3,       // Ropsten's id
+      gas: 5500000,        // Ropsten has a lower block limit than mainnet
+      confirmations: 2,    // # of confs to wait between deployments. (default: 0)
+      timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+    },
+
+    kovan: {
+      provider: new HDWalletProvider(mnemonic_dev, 'https://kovan.infura.io/v3/' + infuraKey),
+      network_id: '*',
+      gas: 4500000,
+      gasPrice: 25000000000
+    },
+
+    rinkeby: {
+      provider: new HDWalletProvider(mnemonic_dev, 'https://rinkeby.infura.io/v3/' + infuraKey),
+      network_id: '*',
+      gas: 4500000,
+      gasPrice: 25000000000
+    },
+
+    mainnet: {
+      provider: new HDWalletProvider(mnemonic_mainnet, 'https://mainnet.infura.io/v3/' + infuraKey),
+      network_id: '*',
+      gas: 4500000,
+      gasPrice: 25000000000
+    }
 
   },
 
@@ -142,15 +166,15 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      // version: "0.5.0",
-      docker: false,
-      settings: {
-       optimizer: {
-         enabled: true,
-         runs: 200
-       },
-       evmVersion: "byzantium"
-      }
+      // version: "0.5.1",    // Fetch exact version from solc-bin (default: truffle's version)
+      // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
+      // settings: {          // See the solidity docs for advice about optimization and evmVersion
+      //  optimizer: {
+      //    enabled: false,
+      //    runs: 200
+      //  },
+      //  evmVersion: "byzantium"
+      // }
     }
   }
 }
