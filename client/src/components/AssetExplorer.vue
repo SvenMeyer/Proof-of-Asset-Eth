@@ -175,10 +175,10 @@ export default {
 
     observableAccount() {
       setTimeout(() => {
-        this.owner_address = window.zilPay.wallet.defaultAccount.bech32;
-        window.zilPay.wallet.observableAccount().subscribe(account => {
-          this.owner_address = account.bech32;
-        });
+        // this.owner_address = window.zilPay.wallet.defaultAccount.bech32;
+        // window.zilPay.wallet.observableAccount().subscribe(account => {
+        // this.owner_address = account.bech32;
+        // });
       }, 1000);
     }
 

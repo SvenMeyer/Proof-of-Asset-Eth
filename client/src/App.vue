@@ -38,13 +38,12 @@
 </template>
 
 <script>
-import IPFSUploadRegister from './components/IPFSUploadRegister'
-import AssetExplorer from './components/AssetExplorer'
-// import ZilPayMixin from './mixins/ZilPay'
-import LoadMixin from './mixins/loader'
+import IPFSUploadRegister from '@/components/IPFSUploadRegister'
+import AssetExplorer from '@/components/AssetExplorer'
+import LoadMixin from '@/mixins/loader'
+import networks from '@/lib/global_config';
 
-// import ProofOfAssetContract from "./contracts/ProofOfAsset.json";
-// import getWeb3 from "./lib/getWeb3";
+// import getWeb3 from "@/lib/getWeb3";
 
 export default {
   name: 'app',
@@ -57,7 +56,7 @@ export default {
   data() {
     return {
       selectedNetwork: "testnet",
-      networks: ["mainnet", "testnet", "private"],
+      networks: {},
     };
   },
 
@@ -69,16 +68,11 @@ export default {
 
 
   mounted() {
-
-    /*
-    window.addEventListener("load", async () => {
-
-*/
-  this.endLoading();
-  console.log("App.vue : mounted");
-
-
+    this.endLoading();
+    console.log("App.vue : mounted");
+    this.networks = Object.keys(networks);
   }
+
 }
 </script>
 

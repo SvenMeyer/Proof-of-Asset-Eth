@@ -1,34 +1,32 @@
-// global configuration defaults for Zilliqa Blockchain network
+// Ethereum network configurations
 
-// [host_url, chain_id, contract_address, private_key, account_address, timeout_deploy, timeout_transition]
+const infuraKey = "fd09fff3423341508083acb38eefb499";
+
 const networks = {
-	local : {
-		host_url : 'http://localhost:7545',
-		chain_id  : 5777,
-		contract_address : '',
-		private_key : '',
-		account_address : '',
-		timeout_deploy     : 10000,
-		timeout_transition :  5000,
-	},
-	testnet  : {
-		host_url : '',
-		chain_id  : 42,
-		contract_address : 'zil1eamq2aakvhydtzc7yew22qdt400t7mc4wmykqa',
-		private_key : '',
-		account_address : 'zil1pw587sm57lvlu0wlwkc3gw2sddy35au6esw589', // '0x0bA87F4374F7d9fe3ddf75b11439506b491A779a',
-		timeout_deploy     : 180000,
-		timeout_transition : 180000,
-	},
-	mainnet  : {
-		host_url : '',
-		chain_id  : 1,
-		contract_address : '',
-		private_key : '',
-		account_address : 'zil1pw587sm57lvlu0wlwkc3gw2sddy35au6esw589', // '0x0bA87F4374F7d9fe3ddf75b11439506b491A779a',
-		timeout_deploy     : 180000,
-		timeout_transition : 180000,
-	},
+  development: {
+    host: "127.0.0.1", // Localhost (default: none)
+    port: 8545, // Standard Ethereum port (default: none)
+    network_id: "*" // Any network (default: none)
+  },
+
+  // Ganache GUI
+  ganache_gui: {
+    host: "http://127.0.0.1",
+    port: 7545,
+    // provider: () => new HDWalletProvider(mnemonic_dev, 'http://127.0.0.1:7545'),
+    network_id: "5777"
+    // shareNonce:false,
+    // websockets: true,	// enabled to use the confirmations listener or to hear Events using .on or .once
+    // production: true,	// Treats this network as if it was a public net. (default: false)
+  },
+
+  kovan: {
+    host: "https://kovan.infura.io/v3/" + infuraKey,
+    // provider: () => new HDWalletProvider(mnemonic_dev, 'https://kovan.infura.io/v3/' + infuraKey),
+    network_id: "*",
+    gas: 4500000,
+    gasPrice: 25000000000
+  }
 };
 
-export {networks}
+export default networks;

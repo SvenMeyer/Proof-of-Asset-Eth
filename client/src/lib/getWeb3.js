@@ -28,11 +28,13 @@ const getWeb3 = async () => {
       if (window.web3) {
         // Use Mist/MetaMask's provider.
         provider = window.web3.currentProvider;
+
       }
       else {
         console.log("No web3 instance injected");
-        provider = new Web3.providers.HttpProvider("http://127.0.0.1:8545");
+        provider = new Web3.providers.HttpProvider("http://127.0.0.1:7545");
       }
+      console.log("provider =", provider);
       const web3 = new Web3(provider);
       return Promise.resolve(web3);
   //  });

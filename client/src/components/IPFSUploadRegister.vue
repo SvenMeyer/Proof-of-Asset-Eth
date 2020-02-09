@@ -1,3 +1,6 @@
+/* eslint-disable no-empty */
+/* eslint-disable no-empty */
+/* eslint-disable no-empty */
 <template>
   <b-jumbotron>
     <!--
@@ -8,87 +11,83 @@
 
     <small class="lead text-danger">{{errorMsg}}</small>
 
-		<b-form class="margin-sm" @submit.stop.prevent="handleSubmit">
-			<div class="border-style">
-				<b-form-file v-model="fileObject" ref="file-input" class="mb-2" autofocus multiple/>
-			</div>
-			<b-button class="margin-xs" variant="primary" @click="handleOk">
-				Upload to IPFS
-			</b-button>
-		</b-form>
+    <b-form class="margin-sm" @submit.stop.prevent="handleSubmit">
+      <div class="border-style">
+        <b-form-file v-model="fileObject" ref="file-input" class="mb-2" autofocus multiple/>
+      </div>
+      <b-button class="margin-xs" variant="primary" @click="handleOk">
+        Upload to IPFS
+      </b-button>
+    </b-form>
 
 
-		<div class="mt-5">
-			<p class="lead">Document Metadata for Zilliqa Blockchain Registration:</p>
+    <div class="mt-5">
+      <p class="lead">Document Metadata for Zilliqa Blockchain Registration:</p>
 
-			<b-form>
+      <b-form>
 
-				<b-form-group id="input-group-1">
+        <b-form-group id="input-group-1">
 
-					<b-form-group id="input-group-2" label="Asset Hash:" label-for="input-2">
-						<b-form-input
-							id="input-2"
-							v-model="ipfs_hash"
-							required
-						></b-form-input>
-					</b-form-group>
+          <b-form-group id="input-group-2" label="Asset Hash:" label-for="input-2">
+            <b-form-input
+              id="input-2"
+              v-model="ipfs_hash"
+              required
+            ></b-form-input>
+          </b-form-group>
 
-					<b-form-group id="input-group-3" label="Asset Serial:" label-for="input-3">
-						<b-form-input
-							id="input-3"
-							v-model="form.asset_serial"
-							required
-						></b-form-input>
-					</b-form-group>
+          <b-form-group id="input-group-3" label="Asset Serial:" label-for="input-3">
+            <b-form-input
+              id="input-3"
+              v-model="form.asset_serial"
+              required
+            ></b-form-input>
+          </b-form-group>
 
-					<b-form-group id="input-group-4" label="Product Name:" label-for="input-4">
-						<b-form-input
-							id="input-4"
-							v-model="form.product_name"
-							required
-						></b-form-input>
-					</b-form-group>
+          <b-form-group id="input-group-4" label="Product Name:" label-for="input-4">
+            <b-form-input
+              id="input-4"
+              v-model="form.product_name"
+              required
+            ></b-form-input>
+          </b-form-group>
 
-					<b-form-group id="input-group-5" label="Custodian:" label-for="input-5">
-						<b-form-input
-							id="input-5"
-							v-model="form.custodian"
-							required
-						></b-form-input>
-					</b-form-group>
+          <b-form-group id="input-group-5" label="Custodian:" label-for="input-5">
+            <b-form-input
+              id="input-5"
+              v-model="form.custodian"
+              required
+            ></b-form-input>
+          </b-form-group>
 
-					<b-button @click="handleRegister" type="button" variant="primary">Register on Blockchain</b-button>
+          <b-button @click="handleRegister" type="button" variant="primary">Register on Blockchain</b-button>
 
-				</b-form-group>
+        </b-form-group>
 
-			</b-form>
+      </b-form>
 
-			<p>txHash    : <b-link :href="explore(txHash)" :disabled="txMessage != 'confirmed'" target="_blank">{{ txHash }}</b-link></p>
+      <p>txHash    : <b-link :href="explore(txHash)" :disabled="txMessage != 'confirmed'" target="_blank">{{ txHash }}</b-link></p>
       <p>txMessage : {{ txMessage }}</p>
 
-		</div>
+    </div>
   </b-jumbotron>
 </template>
 
 <script>
 import {BJumbotron, BFormInput} from 'bootstrap-vue'
 // mixins
-import {ipfs} from "../mixins/ipfs";
-// import ZilPayMixin from '../mixins/ZilPay'
-import LoadMixin from '../mixins/loader'
-import ViewBlockMixin from '../mixins/viewBlock'
+import {ipfs} from "@/mixins/ipfs";
+import LoadMixin from '@/mixins/loader'
+import ViewBlockMixin from '@/mixins/viewBlock'
 
-// standard imports
-// import {Zilliqa} from '@zilliqa-js/zilliqa';
-import {networks} from '../lib/global_config';
-// import {ProofIPFS_API} from '../lib/ProofIPFS_API';
-
-import ProofOfAssetContract from "../contracts/ProofOfAsset.json";
-import getWeb3 from "../lib/getWeb3"
+import networks from '@/lib/global_config';
+import ProofOfAssetContract from "@/contracts/ProofOfAsset.json";
+import getWeb3 from "@/lib/getWeb3"
+// import Contract from "@/lib/Contract"
 
 export default {
 
-  name: 'AssetExplorer',
+  name: 'IPFSUploadRegister',
 
   mixins: [LoadMixin, ViewBlockMixin],
 
@@ -99,19 +98,24 @@ export default {
 
   data() {
     return {
-			show: true,
-			fileObject: null,
-			ipfs_hash: "",
-			form: {
-				asset_serial: "",
-				product_name: "",
-				custodian: "",
-			},
-			txHash: "",
-			txMessage: "",
+      show: true,
+      fileObject: null,
+      ipfs_hash: "",
+      form: {
+        asset_serial: "",
+        product_name: "",
+        custodian: "",
+      },
 
-			owner_address: null,
-			errorMsg: null,
+      networkId   : null,
+      deployedNetwork : null,
+      contract: null,
+
+      txHash: "",
+      txMessage: "",
+
+      owner_address: null,
+      errorMsg: null,
       proof_ipfs: null,
       items: [],
     };
@@ -120,7 +124,7 @@ export default {
   computed: {
     validAddress() {
        return this.owner_address && (this.validateAddress(this.owner_address) !== null);
-		},
+    },
   },
 
   methods: {
@@ -160,50 +164,62 @@ export default {
         }).catch((err) => {
           console.error(err)
         })
-		},
+    },
 
-		async handleRegister() {
-			console.log("handleRegister : form =", this.form);
-			console.log("ipfs_hash =", this.ipfs_hash);
-			const metadata = JSON.stringify(this.form);
+    async handleRegister() {
+      console.log("handleRegister : form =", this.form);
+      console.log("ipfs_hash =", this.ipfs_hash);
+      const metadata = JSON.stringify(this.form);
       console.log("metadata  =", metadata);
 
 
       try {
+        let error_message;
         // Get network provider and web3 instance.
         console.log("getting web3 ...")
         const web3 = await getWeb3();
         console.log({web3});
         console.log("web3.version = ", web3.version);
+        console.log("web3.networkVersion =", web3.networkVersion);
 
         // Get the user's accounts.
         const accounts = await web3.eth.getAccounts();
         console.log({accounts});
 
-        // Get the contract
-        const networkId = await web3.eth.net.getId();
-        console.log({networkId})
-        const deployedNetwork = ProofOfAssetContract.networks[networkId];
-        console.log({deployedNetwork})
-        const contract = new web3.eth.Contract(
-          ProofOfAssetContract.abi,  "0xcfd314B14cAB8c3e36852A249EdcAa1D3Dd05055"
-          // deployedNetwork &&
-          // deployedNetwork.address
-        );
-        console.log({contract});
-        // console.log("this.setState({ web3, accounts, contract });"); // TODO
+        if (! this.contract) {
+          if (! this.networkId) {
+            this.networkId = await web3.eth.net.getId();
+            console.log("networkId =", this.networkId);
+          }
+          this.deployedNetworkIDs = Object.keys(ProofOfAssetContract.networks);
+          console.log("deployedNetworkIDs =", this.deployedNetworkIDs);
+          if (this.deployedNetworkIDs.includes(this.networkId.toString())) {
+            this.contract = new web3.eth.Contract(
+              ProofOfAssetContract.abi,
+              ProofOfAssetContract.networks[this.networkId].address
+            );
 
-        // https://ethereum.stackexchange.com/questions/54507/how-to-call-a-deployed-contract-function
+          console.log("contract = ", this.contract);
 
-        let price = await contract.methods.getPrice().call();
-        console.log({price});
+          let price = await this.contract.methods.getPrice().call();
+          console.log({price});
 
-        let n = await contract.methods.getNumberOfItems(accounts[0]).call();
-        console.log({n});
+          let n = await this.contract.methods.getNumberOfItems(accounts[0]).call();
+          console.log({n});
 
-        let item  = await contract.methods.getItemStructByIndex(0).call();
-        console.log(item);
+          let item  = await this.contract.methods.getItemStructByIndex(0).call();
+          console.log(item);
 
+
+          } else {
+            error_message = "Selected network_id is " + this.networkId +
+              " which is not in the list of network_ids (" +
+              this.deployedNetworkIDs + ") with a deployed contract.\n" +
+              "Please select a different network";
+            console.log(error_message);
+            alert(error_message);
+          }
+        }
       } catch (error) {
         alert(`Failed to load web3, accounts, or contract. Check console for details.`);
         console.error(error);
@@ -224,7 +240,7 @@ export default {
 
       const proof_ipfs = new ProofIPFS_API(deployedContract, network);
 
-			const callTx = await proof_ipfs.registerOwnership(this.ipfs_hash, metadata);
+      const callTx = await proof_ipfs.registerOwnership(this.ipfs_hash, metadata);
 
       this.txHash = callTx.TranID;
       console.log("txHash =", JSON.stringify(this.txHash));
@@ -234,7 +250,7 @@ export default {
         return new Promise(resolve => setTimeout(resolve, ms));
       }
 
-			// const zilliqa = window.zilPay;
+      // const zilliqa = window.zilPay;
       const now = Date.now();
       console.log({now});
       let pending = true;
@@ -248,13 +264,13 @@ export default {
           pending = false;
           this.txMessage = (status.receipt.success ? 'confirmed' : 'failed');
         }, reject_status => {
-					this.txMessage = Math.round((Date.now() - now)/1000) + ' %';
-					console.log({reject_status});
+          this.txMessage = Math.round((Date.now() - now)/1000) + ' %';
+          console.log({reject_status});
         });
         */
 
       }
-		},
+    },
 
     /*
     observableAccount() {
