@@ -59,16 +59,13 @@
 import {BJumbotron, BFormInput} from 'bootstrap-vue'
 
 // mixins imports
-import {ipfs, ipfs_view} from "../mixins/ipfs";
-import ZilPayMixin from '../mixins/ZilPay'
-import LoadMixin from '../mixins/loader'
-import ViewBlockMixin from '../mixins/viewBlock'
+import LoadMixin from '@/mixins/loader'
+import ViewBlockMixin from '@/mixins/viewBlock'
+import {ipfs, ipfs_view} from "@/mixins/ipfs";
 
 // standard imports
-import {Zilliqa} from '@zilliqa-js/zilliqa';
-import {networks} from '../lib/global_config';
-import {ProofIPFS_API} from '../lib/ProofIPFS_API';
-
+import getWeb3 from "@/lib/getWeb3";
+import ProofOfAssetContract from "@/contracts/ProofOfAsset.json";
 
 export default {
 
@@ -79,7 +76,7 @@ export default {
     selectedNetwork: String,
   },
 
-  mixins: [ZilPayMixin, LoadMixin, ViewBlockMixin, ipfs],
+  mixins: [LoadMixin, ViewBlockMixin, ipfs],
 
   components: {
     'b-jumbotron': BJumbotron,
@@ -104,84 +101,84 @@ export default {
   methods: {
 
     async searchItems() {
-      this.errorMsg = null;
-      const hex_address = this.validateAddress(this.owner_address);
-      const network = networks[this.selectedNetwork];
-      console.log("network.host_url =", network.host_url);
-      const zilliqa = new Zilliqa(network.host_url);
+      console.log("searchItems");
 
-      console.log("network.contract_address =", network.contract_address);
-      const deployedContract = zilliqa.contracts.at(network.contract_address);
-      const chain_id  = network.chain_id;
-      console.log({chain_id});
-      const prof_ipfs = new ProofIPFS_API(deployedContract, chain_id);
-
-      // this.startLoading('Transaction pending ...');
-      const response_items = await prof_ipfs.getItemList(hex_address);
-      console.log({response_items});
-
-      const tableRows = response_items.map(i => ({
-        Asset_IPFS_Hash : i ,
-        asset_serial : "",
-        block_number: "",
-        time_stamp   : "",
-        product_name : "",
-        custodian   : "",
-        documents: "<a href='" + ipfs_view + i + "' target='_blank'>" + "[Documents Link]" + "</a>"}));
-
-      this.items = tableRows;
-      console.log({tableRows})
-
-      this.items.forEach(async row => {
-        console.log({row})
-        const reg_info = await prof_ipfs.getRegistration(row.Asset_IPFS_Hash);
-        console.log({reg_info});
-        const blocknumber = reg_info[1];
-        const metadata = JSON.parse(reg_info[2]);
-        console.log({metadata});
-        // const response_blocktime = await this.getBlockTime(blocknumber);
-        const response_blocktime = await zilliqa.blockchain.getTxBlock(blocknumber);
-        const ms = response_blocktime.result.header.Timestamp;
-        row.asset_serial = metadata.asset_serial;
-        const block_link = this.explore(blocknumber, 'block');
-        row.block_number = "<a href='" + block_link + "' target='_blank'>" + blocknumber + "</a>"
-        row.time_stamp   = new Date(Math.round(ms/1000))  // .toISOString();
-        row.product_name = metadata.product_name;
-        row.custodian    = metadata.custodian;
-
-        console.log({row});
-      })
-
-      // this.endLoading();
-    },
-
-
-/*
       try {
-        this.contract = await this.deployFungibleToken(
-          this.owner_address,
-          this.form.totalSupply,
-          this.form.decimals,
-          this.form.name,
-          this.form.symbol
-        );
-        await this.txObservable(this.contract.id);
-        this.$refs[this.isDeploy].show();
-      } catch(err) {
-        this.errorMsg = err.message || err;
+        let error_message;
+        // Get network provider and web3 instance.
+        console.log("getting web3 ...")
+        const web3 = await getWeb3();
+        console.log({web3});
+        console.log("web3.version = ", web3.version);
+        console.log("web3.networkVersion =", web3.networkVersion);
+
+        // Get the user's accounts.
+        const accounts = await web3.eth.getAccounts();
+        console.log({accounts});
+        this.owner_address = accounts[0];
+
+        if (! this.contract) {
+          if (! this.networkId) {
+            this.networkId = await web3.eth.net.getId();
+            console.log("networkId =", this.networkId);
+          }
+          this.deployedNetworkIDs = Object.keys(ProofOfAssetContract.networks);
+          console.log("deployedNetworkIDs =", this.deployedNetworkIDs);
+          if (this.deployedNetworkIDs.includes(this.networkId.toString())) {
+            this.contract = new web3.eth.Contract(
+              ProofOfAssetContract.abi,
+              ProofOfAssetContract.networks[this.networkId].address
+            );
+          } else {
+            error_message = "Selected network_id is " + this.networkId +
+              " which is not in the list of network_ids (" +
+              this.deployedNetworkIDs + ") with a deployed contract.\n" +
+              "Please select a different network";
+            console.log(error_message);
+            alert(error_message);
+          }
+        }
+
+        const keys = [
+          { blockTimestamp : "Time Stamp" },
+          { productAmount  : "Product Amount" },
+          { mintAmount     : "Token Amount" },
+          { tokenContract  : "tokenContract"},
+          { registrar      : "Registrar" },
+          { fileHash       : "File Hash" },
+          { adrCloudStorage: "File Storage Link" },
+          { productName    : "Product Name" },
+          { metadata       : "Metadata" }
+        ];
+
+        if (this.contract) {
+          console.log("calling : contract.methods.getNumberOfItems()");
+
+          let n = await this.contract.methods.getNumberOfItems(accounts[0]).call();
+          console.log("number of items is now : ", n);
+
+          let item  = await this.contract.methods.getItemStructByIndex(n-1).call();
+          console.log(item);
+
+          let row = {}
+          for (let i=0; i < keys.length; i++) {
+            let key = Object.keys(keys[i])
+
+            let k = key[0];
+            console.log("k =", k);
+            row[k] = item[k];
+            console.log(k, item[k])
+          }
+          row.documents = "<a href='" + ipfs_view + item.hash + "' target='_blank'>" + "[Documents]" + "</a>";
+          console.log(row);
+          this.items.push(row);
+        }
+
+      } catch (error) {
+        alert("Failed to load web3, accounts, contract or execute contract call. Check console for details.");
+        console.error(error);
       }
-*/
-
-
-    observableAccount() {
-      setTimeout(() => {
-        // this.owner_address = window.zilPay.wallet.defaultAccount.bech32;
-        // window.zilPay.wallet.observableAccount().subscribe(account => {
-        // this.owner_address = account.bech32;
-        // });
-      }, 1000);
-    }
-
+    },
   },
 
   mounted() {
