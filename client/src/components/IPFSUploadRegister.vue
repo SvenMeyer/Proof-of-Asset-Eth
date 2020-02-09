@@ -22,42 +22,34 @@
 
 
     <div class="mt-5">
-      <p class="lead">Document Metadata for Zilliqa Blockchain Registration:</p>
+      <p class="lead">Provide Product Information and define Token mint process:</p>
 
       <b-form>
 
         <b-form-group id="input-group-1">
 
-          <b-form-group id="input-group-2" label="Asset Hash:" label-for="input-2">
-            <b-form-input
-              id="input-2"
-              v-model="ipfs_hash"
-              required
-            ></b-form-input>
+          <b-form-group id="input-group-hash" label-cols-sm="4" label-cols-lg="3" label="File Hash" label-for="hash">
+            <b-form-input id="hash" v-model="ipfs_hash" required></b-form-input>
           </b-form-group>
 
-          <b-form-group id="input-group-3" label="Asset Serial:" label-for="input-3">
-            <b-form-input
-              id="input-3"
-              v-model="form.asset_serial"
-              required
-            ></b-form-input>
+          <b-form-group id="input-group-product-name" label-cols-sm="4" label-cols-lg="3" label="Product Name" label-for="product-name">
+            <b-form-input id="product-name" v-model="form.product_name" required></b-form-input>
           </b-form-group>
 
-          <b-form-group id="input-group-4" label="Product Name:" label-for="input-4">
-            <b-form-input
-              id="input-4"
-              v-model="form.product_name"
-              required
-            ></b-form-input>
+          <b-form-group id="input-group-product-amount" label-cols-sm="4" label-cols-lg="3" label="Product Amount" label-for="product-amount">
+            <b-form-input id="product-amount" v-model="form.product_amount" required></b-form-input>
           </b-form-group>
 
-          <b-form-group id="input-group-5" label="Custodian:" label-for="input-5">
-            <b-form-input
-              id="input-5"
-              v-model="form.custodian"
-              required
-            ></b-form-input>
+          <b-form-group id="input-group-token-name" label-cols-sm="4" label-cols-lg="3" label="Token Name" label-for="token-name">
+            <b-form-select id="token-name" v-model="form.token_name" :options="token_options"></b-form-select>
+          </b-form-group>
+
+          <b-form-group id="input-group-token-amount" label-cols-sm="4" label-cols-lg="3" label="Token Amount" label-for="token-amount">
+            <b-form-input id="token-amount" v-model="form.token_amount" required></b-form-input>
+          </b-form-group>
+
+          <b-form-group id="input-group-notes" label-cols-sm="4" label-cols-lg="3" label="MetaData / Notes:" label-for="notes">
+            <b-form-input id="notes" v-model="form.notes" required></b-form-input>
           </b-form-group>
 
           <b-button @click="handleRegister" type="button" variant="primary">Register on Blockchain</b-button>
@@ -80,7 +72,7 @@ import {ipfs} from "@/mixins/ipfs";
 import LoadMixin from '@/mixins/loader'
 import ViewBlockMixin from '@/mixins/viewBlock'
 
-import networks from '@/lib/global_config';
+// import networks from '@/lib/global_config';
 import ProofOfAssetContract from "@/contracts/ProofOfAsset.json";
 import getWeb3 from "@/lib/getWeb3"
 // import Contract from "@/lib/Contract"
@@ -102,10 +94,16 @@ export default {
       fileObject: null,
       ipfs_hash: "",
       form: {
-        asset_serial: "",
         product_name: "",
-        custodian: "",
+        product_amount: 0,
+        token_name: null,
+        token_amount: 0,
+        notes: ""
       },
+      token_options: [
+        { value: null, text: 'Select a Token to mint' },
+        { value: '0x1621aec5d5b2e6ec6d9b58399e9d5253af86df5f', text: 'FOC1 (only kovan testnet)' },
+      ],
 
       networkId   : null,
       deployedNetwork : null,
@@ -172,7 +170,6 @@ export default {
       const metadata = JSON.stringify(this.form);
       console.log("metadata  =", metadata);
 
-
       try {
         let error_message;
         // Get network provider and web3 instance.
@@ -198,19 +195,6 @@ export default {
               ProofOfAssetContract.abi,
               ProofOfAssetContract.networks[this.networkId].address
             );
-
-          console.log("contract = ", this.contract);
-
-          let price = await this.contract.methods.getPrice().call();
-          console.log({price});
-
-          let n = await this.contract.methods.getNumberOfItems(accounts[0]).call();
-          console.log({n});
-
-          let item  = await this.contract.methods.getItemStructByIndex(0).call();
-          console.log(item);
-
-
           } else {
             error_message = "Selected network_id is " + this.networkId +
               " which is not in the list of network_ids (" +
@@ -220,81 +204,80 @@ export default {
             alert(error_message);
           }
         }
+
+        if (this.contract) {
+          console.log("contract = ", this.contract);
+
+          let price = await this.contract.methods.getPrice().call();
+          console.log({price});
+
+          let result  = await this.contract.methods.setPrice(999).send({ from: accounts[0], gas: 50000, gasPrice: 1e6 });
+          console.log({result});
+
+          price = await this.contract.methods.getPrice().call();
+          console.log({price});
+
+          let n = await this.contract.methods.getNumberOfItems(accounts[0]).call();
+          console.log({n});
+
+          let item  = await this.contract.methods.getItemStructByIndex(0).call();
+          console.log(item);
+
+          // addItem(string,string,string,uint256,string,address,uint256):
+
+          console.log(
+            this.ipfs_hash,
+            "ipfs://",
+            this.form.product_name,
+            parseInt(this.form.product_amount),
+            this.form.notes,
+            this.form.token_name,
+            parseInt(this.form.token_amount)
+          );
+
+          result  = await this.contract.methods.addItem(
+            this.ipfs_hash,
+            "ipfs://",
+            this.form.product_name,
+            parseInt(this.form.product_amount),
+            this.form.notes,
+            this.form.token_name,
+            parseInt(this.form.token_amount)
+          ).send({ from: accounts[0], gas: 1e6, gasPrice: 1e6 });
+
+          console.log({result});
+
+          n = await this.contract.methods.getNumberOfItems(accounts[0]).call();
+          console.log({n});
+
+          item  = await this.contract.methods.getItemStructByIndex(n-1).call();
+          console.log(item);
+
+        }
+
       } catch (error) {
         alert(`Failed to load web3, accounts, or contract. Check console for details.`);
         console.error(error);
       }
 
       /*
-      const zilliqa = window.zilPay;
-      const zilPayNetwork = zilliqa.wallet.net;
-      console.log({zilPayNetwork})
-      const network = networks[zilPayNetwork];
-
-      // TODO : set selectedNetwork in NavBar to network
-
-      console.log("network.host_url =", network.host_url);
-
-      console.log("network.contract_address =", network.contract_address);
-      const deployedContract = zilliqa.contracts.at(network.contract_address);
-
-      const proof_ipfs = new ProofIPFS_API(deployedContract, network);
-
-      const callTx = await proof_ipfs.registerOwnership(this.ipfs_hash, metadata);
-
-      this.txHash = callTx.TranID;
-      console.log("txHash =", JSON.stringify(this.txHash));
-      */
-
       function timeout(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
       }
-
-      // const zilliqa = window.zilPay;
-      const now = Date.now();
-      console.log({now});
-      let pending = true;
-      while (pending) {
-        await timeout(2000);
-
-        /*
-        zilliqa.blockchain.getTransaction(this.txHash)
-        .then(status => {
-          console.log("txStatus =", JSON.stringify(status));
-          pending = false;
-          this.txMessage = (status.receipt.success ? 'confirmed' : 'failed');
-        }, reject_status => {
-          this.txMessage = Math.round((Date.now() - now)/1000) + ' %';
-          console.log({reject_status});
-        });
-        */
-
-      }
-    },
-
-    /*
-    observableAccount() {
-      setTimeout(() => {
-        this.owner_address = window.zilPay.wallet.defaultAccount.bech32;
-        window.zilPay.wallet.observableAccount().subscribe(account => {
-          this.owner_address = account.bech32;
-        });
-      }, 1000);
-    }
-    */
-
+      */
+    } // END handleRegister
   },
 
   mounted() {
     try {
-      // this.observableAccount();
       console.log("IPFSUploadRegister.vue : mounted")
-      console.log(networks.local.host_url);
     } catch(err) {
       /* eslint-disable */
     }
   }
+
 }
+
 </script>
 
 <style>

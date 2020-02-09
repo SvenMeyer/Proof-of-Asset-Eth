@@ -1,4 +1,4 @@
-# Zilliqa Proof of Asset - Client
+# Proof-of-Asset & IPFS upload & mint token - Ethereum & Vue version
 
 ## Project setup
 ```
