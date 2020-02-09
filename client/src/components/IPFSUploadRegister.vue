@@ -167,8 +167,6 @@ export default {
     async handleRegister() {
       console.log("handleRegister : form =", this.form);
       console.log("ipfs_hash =", this.ipfs_hash);
-      const metadata = JSON.stringify(this.form);
-      console.log("metadata  =", metadata);
 
       try {
         let error_message;
@@ -206,36 +204,8 @@ export default {
         }
 
         if (this.contract) {
-          console.log("contract = ", this.contract);
-
-          let price = await this.contract.methods.getPrice().call();
-          console.log({price});
-
-          let result  = await this.contract.methods.setPrice(999).send({ from: accounts[0], gas: 50000, gasPrice: 1e6 });
-          console.log({result});
-
-          price = await this.contract.methods.getPrice().call();
-          console.log({price});
-
-          let n = await this.contract.methods.getNumberOfItems(accounts[0]).call();
-          console.log({n});
-
-          let item  = await this.contract.methods.getItemStructByIndex(0).call();
-          console.log(item);
-
-          // addItem(string,string,string,uint256,string,address,uint256):
-
-          console.log(
-            this.ipfs_hash,
-            "ipfs://",
-            this.form.product_name,
-            parseInt(this.form.product_amount),
-            this.form.notes,
-            this.form.token_name,
-            parseInt(this.form.token_amount)
-          );
-
-          result  = await this.contract.methods.addItem(
+          console.log("calling : contract.methods.addItem()");
+          let result  = await this.contract.methods.addItem(
             this.ipfs_hash,
             "ipfs://",
             this.form.product_name,
@@ -247,16 +217,15 @@ export default {
 
           console.log({result});
 
-          n = await this.contract.methods.getNumberOfItems(accounts[0]).call();
-          console.log({n});
+          let n = await this.contract.methods.getNumberOfItems(accounts[0]).call();
+          console.log("number of items is now : ", n);
 
-          item  = await this.contract.methods.getItemStructByIndex(n-1).call();
+          let item  = await this.contract.methods.getItemStructByIndex(n-1).call();
           console.log(item);
-
         }
 
       } catch (error) {
-        alert(`Failed to load web3, accounts, or contract. Check console for details.`);
+        alert("Failed to load web3, accounts, contract or execute contract call. Check console for details.");
         console.error(error);
       }
 
