@@ -1,19 +1,19 @@
 <template>
   <b-jumbotron>
     <h1>Proof of Asset Explorer</h1>
-    <p class="lead">List all assets registered by a certain address (selected network = {{selectedNetwork}}) :</p>
+    <p class="lead">List of all assets registered by a certain address (selected network = {{selectedNetwork}}) :</p>
 
     <small class="lead text-danger">{{errorMsg}}</small>
 
-    <b-input-group class="mb-3" prepend="Zil Address">
+    <b-input-group class="mb-3" prepend="Registrar Ethereum Address">
       <b-form-input
         v-model="owner_address"
-        :state="validAddress"
+        :state="readyToSearch"
         type="text"
         required>
       </b-form-input>
       <b-input-group-append>
-        <b-button @click="searchItems" type="button" variant="primary">Search</b-button>
+        <b-button @click="searchItems" type="button" variant="primary" :disabled="!readyToSearch">Search</b-button>
       </b-input-group-append>
     </b-input-group>
 
@@ -85,6 +85,8 @@ export default {
 
   data() {
     return {
+      mounted: false,
+      web3: null,
       owner_address: null,
       errorMsg: null,
       items: [],
@@ -93,9 +95,15 @@ export default {
   },
 
   computed: {
-    validAddress() {
-       return this.owner_address && (this.validateAddress(this.owner_address) !== null);
+
+    readyToSearch() {
+      return (
+        this.mounted &&
+        this.owner_address &&
+        this.web3 &&
+        this.web3.utils.isAddress(this.owner_address));
     }
+
   },
 
   methods: {
@@ -105,27 +113,16 @@ export default {
 
       try {
         let error_message;
-        // Get network provider and web3 instance.
-        console.log("getting web3 ...")
-        const web3 = await getWeb3();
-        console.log({web3});
-        console.log("web3.version = ", web3.version);
-        console.log("web3.networkVersion =", web3.networkVersion);
-
-        // Get the user's accounts.
-        const accounts = await web3.eth.getAccounts();
-        console.log({accounts});
-        this.owner_address = accounts[0];
 
         if (! this.contract) {
           if (! this.networkId) {
-            this.networkId = await web3.eth.net.getId();
+            this.networkId = await this.web3.eth.net.getId();
             console.log("networkId =", this.networkId);
           }
           this.deployedNetworkIDs = Object.keys(ProofOfAssetContract.networks);
           console.log("deployedNetworkIDs =", this.deployedNetworkIDs);
           if (this.deployedNetworkIDs.includes(this.networkId.toString())) {
-            this.contract = new web3.eth.Contract(
+            this.contract = new this.web3.eth.Contract(
               ProofOfAssetContract.abi,
               ProofOfAssetContract.networks[this.networkId].address
             );
@@ -139,39 +136,44 @@ export default {
           }
         }
 
-        const keys = [
-          { blockTimestamp : "Time Stamp" },
-          { productAmount  : "Product Amount" },
-          { mintAmount     : "Token Amount" },
-          { tokenContract  : "tokenContract"},
-          { registrar      : "Registrar" },
-          { fileHash       : "File Hash" },
-          { adrCloudStorage: "File Storage Link" },
-          { productName    : "Product Name" },
-          { metadata       : "Metadata" }
-        ];
+        const header = {
+          id             : "ID",
+          blockTimestamp : "Time Stamp" ,
+          productAmount  : "Product Amount" ,
+          productName    : "Product Name" ,
+          mintAmount     : "Token Amount" ,
+          tokenContract  : "tokenContract",
+          //  registrar      : "Registrar" ,
+          fileHash       : "File Hash" ,
+          adrCloudStorage: "File Storage Link" ,
+          metadata       : "Metadata"
+        };
+
 
         if (this.contract) {
           console.log("calling : contract.methods.getNumberOfItems()");
 
-          let n = await this.contract.methods.getNumberOfItems(accounts[0]).call();
+          // do not cache - start with an empty table
+          this.items = [];
+
+          let n = await this.contract.methods.getNumberOfItems(this.owner_address).call();
           console.log("number of items is now : ", n);
 
-          let item  = await this.contract.methods.getItemStructByIndex(n-1).call();
-          console.log(item);
-
-          let row = {}
-          for (let i=0; i < keys.length; i++) {
-            let key = Object.keys(keys[i])
-
-            let k = key[0];
-            console.log("k =", k);
-            row[k] = item[k];
-            console.log(k, item[k])
+          for (let index = n-1; index >= 0; index--) {
+            const item  = await this.contract.methods.getItembyIndex(this.owner_address, index).call();
+            console.log("item =", index, item);
+            let row = {};
+            for (let key in header) {
+               console.log(key, header[key]);
+              if (key == 'blockTimestamp')
+                row[header[key]] = new Date(item[key]*1000).toLocaleString(undefined, {dateStyle:'medium',timeStyle:'medium'});
+              else
+                row[header[key]] = item[key];
+            }
+            row.documents = "<a href='" + ipfs_view + item.fileHash + "' target='_blank'>" + "[Documents]" + "</a>";
+            console.log(index, row);
+            this.items.push(row);
           }
-          row.documents = "<a href='" + ipfs_view + item.hash + "' target='_blank'>" + "[Documents]" + "</a>";
-          console.log(row);
-          this.items.push(row);
         }
 
       } catch (error) {
@@ -183,7 +185,19 @@ export default {
 
   mounted() {
     try {
-      this.observableAccount();
+      // this.observableAccount();
+              // Get network provider and web3 instance.
+        console.log("getting web3 ...")
+        this.web3 = getWeb3();
+        console.log("web3 =", this.web3);
+        console.log("web3.version = ", this.web3.version);
+        console.log("web3.networkVersion =", this.web3.networkVersion);
+        this.mounted = true;
+        // Get the user's accounts.
+        this.web3.eth.getAccounts().then(accounts => {
+          this.owner_address = accounts[0];
+          console.log("owner_address =", this.owner_address);
+        });
     } catch(err) {
       /* eslint-disable */
     }
