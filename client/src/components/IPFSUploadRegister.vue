@@ -172,7 +172,7 @@ export default {
         let error_message;
         // Get network provider and web3 instance.
         console.log("getting web3 ...")
-        const web3 = await getWeb3();
+        const web3 = getWeb3();
         console.log({web3});
         console.log("web3.version = ", web3.version);
         console.log("web3.networkVersion =", web3.networkVersion);
