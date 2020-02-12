@@ -41,7 +41,7 @@
           </b-form-group>
 
           <b-form-group id="input-group-token-name" label-cols-sm="4" label-cols-lg="3" label="Token Name" label-for="token-name">
-            <b-form-select id="token-name" v-model="form.token_name" :options="token_options"></b-form-select>
+            <b-form-select id="token-name" v-model="form.token_index" :options="token_options"></b-form-select>
           </b-form-group>
 
           <b-form-group id="input-group-token-amount" label-cols-sm="4" label-cols-lg="3" label="Token Amount" label-for="token-amount">
@@ -74,8 +74,11 @@ import ViewBlockMixin from '@/mixins/viewBlock'
 
 // import networks from '@/lib/global_config';
 import ProofOfAssetContract from "@/contracts/ProofOfAsset.json";
+import FECoinContract       from "@/contracts/FECoin.json";
 import getWeb3 from "@/lib/getWeb3"
 // import Contract from "@/lib/Contract"
+
+import * as token_config from "@/config.json";  // copy of 0x-launch-kit-frontend/src/config.json
 
 export default {
 
@@ -96,19 +99,23 @@ export default {
       form: {
         product_name: "",
         product_amount: 0,
-        token_name: null,
+        token_index : null,
         token_amount: 0,
         notes: ""
       },
       token_options: [
         { value: null, text: 'Select a Token to mint' },
-        { value: '0x1621aec5d5b2e6ec6d9b58399e9d5253af86df5f', text: 'FOC1 (only kovan testnet)' },
+      //   { value: '0x1621aec5d5b2e6ec6d9b58399e9d5253af86df5f', text: 'FOC1 (only kovan testnet)' },
       ],
+
+      token_config:null,
 
       networkId   : null,
       deployedNetwork : null,
       contract: null,
       result: null,
+      txHash: null,
+      txMessage: null,
 
       items: [],
     };
@@ -164,17 +171,38 @@ export default {
       console.log("ipfs_hash =", this.ipfs_hash);
 
       try {
-        let error_message;
+        // mint token
+        console.log("token =", this.form.token_index);
         // Get network provider and web3 instance.
         console.log("getting web3 ...")
         const web3 = await getWeb3();
         console.log({web3});
         console.log("web3.version = ", web3.version);
         console.log("web3.networkVersion =", web3.networkVersion);
+        if (! this.networkId) {
+              this.networkId = await web3.eth.net.getId();
+              console.log("networkId =", this.networkId);
+        }
+        let token_contract_address = token_config.tokens[this.form.token_index].addresses[this.networkId];
+        console.log({token_contract_address});
+
+        let token_contract = new web3.eth.Contract(FECoinContract.abi, token_contract_address);
+        console.log({token_contract})
+        let token_name  = await token_contract.methods.name().call();
 
         // Get the user's accounts.
         const accounts = await web3.eth.getAccounts();
-        console.log({accounts});
+
+        console.log("minting", this.form.token_amount, token_name, "for", accounts[0])
+        let result_mint = await token_contract.methods.mint(accounts[0], parseInt(this.form.token_amount)).call();
+        console.log({result_mint})
+
+        // -------------------------------------------
+
+        let error_message;
+
+
+
 
         if (! this.contract) {
           if (! this.networkId) {
@@ -210,11 +238,15 @@ export default {
             this.form.product_name,
             parseInt(this.form.product_amount),
             this.form.notes,
-            this.form.token_name,
+            token_contract_address,
+            // token_mint_tx_hash,
             parseInt(this.form.token_amount)
           ).send({ from: accounts[0], gas: 4e6, gasPrice: 1e6 });
 
           console.log("result =", this.result);
+
+          this.txHash = this.result.transactionHash;
+          this.txMessage = this.result.blockHash;
 
           let n = await this.contract.methods.getNumberOfItems(accounts[0]).call();
           console.log("number of items is now : ", n);
@@ -238,7 +270,12 @@ export default {
 
   mounted() {
     try {
-      console.log("IPFSUploadRegister.vue : mounted")
+      console.log("IPFSUploadRegister.vue : mounted");
+      console.log(token_config);
+      token_config.tokens.forEach((token, index) => {
+        this.token_options.push({value: index, text: token.symbol + " - " + token.name})
+      });
+
     } catch(err) {
       /* eslint-disable */
     }

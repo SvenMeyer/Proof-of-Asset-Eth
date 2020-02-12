@@ -30,6 +30,7 @@
     "@truffle/hdwallet-provider": "^1.0.30"
   },
   "devDependencies": {
-    "@openzeppelin/cli": "^2.6.0"
+    "@openzeppelin/cli": "^2.6.0",
+    "husky": "^4.2.2"
   }
 }
