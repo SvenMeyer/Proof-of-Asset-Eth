@@ -184,20 +184,28 @@ export default {
   },
 
   mounted() {
+    this.mounted = true;
     try {
       // this.observableAccount();
               // Get network provider and web3 instance.
         console.log("getting web3 ...")
-        this.web3 = getWeb3();
-        console.log("web3 =", this.web3);
-        console.log("web3.version = ", this.web3.version);
-        console.log("web3.networkVersion =", this.web3.networkVersion);
-        this.mounted = true;
-        // Get the user's accounts.
-        this.web3.eth.getAccounts().then(accounts => {
-          this.owner_address = accounts[0];
-          console.log("owner_address =", this.owner_address);
-        });
+
+        getWeb3()
+        .then(_web3 => {
+          this.web3 = _web3;
+          console.log("web3 =", this.web3);
+          console.log("web3.version = ", this.web3.version);
+          console.log("web3.networkVersion =", this.web3.networkVersion);
+          console.log("requesting account access");
+          this.web3.eth.getAccounts();
+        })
+        .then(accounts => {
+            this.owner_address = accounts[0];
+            console.log("owner_address =", this.owner_address);
+        })
+        .catch(error => {
+          console.log("Could not access accounts. error :", error)
+        })
     } catch(err) {
       /* eslint-disable */
     }

@@ -108,13 +108,8 @@ export default {
       networkId   : null,
       deployedNetwork : null,
       contract: null,
+      result: null,
 
-      txHash: "",
-      txMessage: "",
-
-      owner_address: null,
-      errorMsg: null,
-      proof_ipfs: null,
       items: [],
     };
   },
@@ -172,7 +167,7 @@ export default {
         let error_message;
         // Get network provider and web3 instance.
         console.log("getting web3 ...")
-        const web3 = getWeb3();
+        const web3 = await getWeb3();
         console.log({web3});
         console.log("web3.version = ", web3.version);
         console.log("web3.networkVersion =", web3.networkVersion);
@@ -204,8 +199,12 @@ export default {
         }
 
         if (this.contract) {
+          console.log(this.contract)
+          console.log("getting owner of contract");
+          let owner = await this.contract.methods.owner().call();
+          console.log("owner =", owner)
           console.log("calling : contract.methods.addItem()");
-          let result  = await this.contract.methods.addItem(
+          this.result  = await this.contract.methods.addItem(
             this.ipfs_hash,
             "ipfs://",
             this.form.product_name,
@@ -213,9 +212,9 @@ export default {
             this.form.notes,
             this.form.token_name,
             parseInt(this.form.token_amount)
-          ).send({ from: accounts[0], gas: 1e6, gasPrice: 1e6 });
+          ).send({ from: accounts[0], gas: 4e6, gasPrice: 1e6 });
 
-          console.log({result});
+          console.log("result =", this.result);
 
           let n = await this.contract.methods.getNumberOfItems(accounts[0]).call();
           console.log("number of items is now : ", n);
