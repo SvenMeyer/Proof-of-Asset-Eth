@@ -8,14 +8,15 @@
     <p></p>
     -->
     <p class="lead">Upload document to IPFS:</p>
-
+    <!--
     <small class="lead text-danger">{{errorMsg}}</small>
+    -->
 
     <b-form class="margin-sm" @submit.stop.prevent="handleSubmit">
       <div class="border-style">
         <b-form-file v-model="fileObject" ref="file-input" class="mb-2" autofocus multiple/>
       </div>
-      <b-button class="margin-xs" variant="primary" @click="handleOk">
+      <b-button class="margin-xs" @click="handleOk">
         Upload to IPFS
       </b-button>
     </b-form>
@@ -52,14 +53,14 @@
             <b-form-input id="notes" v-model="form.notes" required></b-form-input>
           </b-form-group>
 
-          <b-button @click="handleRegister" type="button" variant="primary">Register on Blockchain</b-button>
+          <b-button @click="handleRegister" type="button">Register on Blockchain</b-button>
 
         </b-form-group>
 
       </b-form>
 
-      <p>txHash    : <b-link :href="explore(txHash)" :disabled="txMessage != 'confirmed'" target="_blank">{{ txHash }}</b-link></p>
-      <p>txMessage : {{ txMessage }}</p>
+      <p class="text-monospace">Tx Hash Mint: <b-link :href=txHashMintLink :disabled="!txHashMint" target="_blank">{{ txHashMint }}</b-link></p>
+      <p class="text-monospace">Tx Hash POA : <b-link :href=txHashPOALink  :disabled="!txHashPOA"  target="_blank">{{ txHashPOA }} </b-link></p>
 
     </div>
   </b-jumbotron>
@@ -103,28 +104,54 @@ export default {
         token_amount: 0,
         notes: ""
       },
+
       token_options: [
         { value: null, text: 'Select a Token to mint' },
-      //   { value: '0x1621aec5d5b2e6ec6d9b58399e9d5253af86df5f', text: 'FOC1 (only kovan testnet)' },
       ],
 
-      token_config:null,
+      token_config: null,
 
-      networkId   : null,
+      networkId   : null,  // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md#list-of-chain-ids
+      networkName : null,
       deployedNetwork : null,
       contract: null,
       result: null,
-      txHash: null,
+      txHashPOA: null,
       txMessage: null,
+
+      txHashMint: null,
 
       items: [],
     };
   },
 
   computed: {
+
     validAddress() {
        return this.owner_address && (this.validateAddress(this.owner_address) !== null);
     },
+
+    // Is there a better solution? Computed with parameter would be nice
+    // https://stackoverflow.com/questions/40522634/can-i-pass-parameters-in-computed-properties-in-vue-js
+
+    txHashMintLink() {
+      if (this.networkName == 'main') {
+        return "https://etherscan.io/tx/" + this.txHashMint;
+      } else if (this.networkName)
+        return "https://" + this.networkName + ".etherscan.io/tx/" + this.txHashMint;
+      else
+        return '';
+    },
+
+    txHashPOALink() {
+      if (this.networkName == 'main') {
+        return "https://etherscan.io/tx/" + this.txHashPOA;
+      } else if (this.networkName)
+        return "https://" + this.networkName + ".etherscan.io/tx/" + this.txHashPOA;
+      else
+        return '';
+    }
+
   },
 
   methods: {
@@ -179,10 +206,18 @@ export default {
         console.log({web3});
         console.log("web3.version = ", web3.version);
         console.log("web3.networkVersion =", web3.networkVersion);
+
         if (! this.networkId) {
-              this.networkId = await web3.eth.net.getId();
-              console.log("networkId =", this.networkId);
+          this.networkId = await web3.eth.net.getId();
+          console.log("networkId =", this.networkId);
         }
+
+        if (! this.networkName) {
+          this.networkName = await await web3.eth.net.getNetworkType();
+          console.log("networkName =", this.networkName);
+          console.log("web3.version.network =", web3.version.network)
+        }
+
         console.log("this.form.token_index =", this.form.token_index)
         console.log("token_config.tokens =", token_config.tokens)
         let token_contract_address = token_config.tokens[this.form.token_index].addresses[this.networkId];
@@ -198,18 +233,18 @@ export default {
         console.log("minting", this.form.token_amount, token_name, "for", accounts[0])
         let balance = await token_contract.methods.balanceOf(accounts[0]).call();
         console.log("balance =", balance);
-        let result_mint = await token_contract.methods.mint(accounts[0], this.form.token_amount.toString() ).send({ from: accounts[0], gas: 1e6, gasPrice: 1e6 }); // web3.utils.toBN(
+        let result_mint = await token_contract.methods.mint(
+          accounts[0],
+          this.form.token_amount.toString() )
+          .send({ from: accounts[0], gas: 1e6, gasPrice: 1e6 });
         console.log({result_mint})
+        this.txHashMint = result_mint.transactionHash;
         balance = await token_contract.methods.balanceOf(accounts[0]).call();
         console.log("balance =", balance);
+
         console.log("end mint ---------------------------")
 
-        // -------------------------------------------
-
         let error_message;
-
-
-
 
         if (! this.contract) {
           if (! this.networkId) {
@@ -251,15 +286,13 @@ export default {
           ).send({ from: accounts[0], gas: 4e6, gasPrice: 1e6 });
 
           console.log("result =", this.result);
+          this.txHashPOA = this.result.transactionHash;
 
-          this.txHash = this.result.transactionHash;
-          this.txMessage = this.result.blockHash;
-
-          let n = await this.contract.methods.getNumberOfItems(accounts[0]).call();
-          console.log("number of items is now : ", n);
-
-          let item  = await this.contract.methods.getItemStructByIndex(n-1).call();
-          console.log(item);
+          this.contract.methods.getNumberOfItems(accounts[0]).call().then(n => {
+            console.log("number of items is now : ", n) ;
+            return this.contract.methods.getItemStructByIndex(n-1).call(); })
+          .then(item =>
+            console.log("new entry =", item));
         }
 
       } catch (error) {
@@ -293,5 +326,4 @@ export default {
 </script>
 
 <style>
-
 </style>
