@@ -3,7 +3,9 @@
     <h1>Proof of Asset Explorer</h1>
     <p class="lead">List of all assets registered by a certain address (selected network = {{selectedNetwork}}) :</p>
 
+    <!--
     <small class="lead text-danger">{{errorMsg}}</small>
+    -->
 
     <b-input-group class="mb-3" prepend="Registrar Ethereum Address">
       <b-form-input
@@ -23,7 +25,15 @@
         <span v-html="block.value"></span>
       </template>
 
-      <template v-slot:cell(documents)="data">
+      <template v-slot:cell(mintAmount)="data">
+        <span v-html="data.value"></span>
+      </template>
+
+      <template v-slot:cell(tokenContract)="data">
+        <span v-html="data.value"></span>
+      </template>
+
+      <template v-slot:cell(fileHash)="data">
         <span v-html="data.value"></span>
       </template>
 
@@ -139,13 +149,14 @@ export default {
         const header = {
           id             : "ID",
           blockTimestamp : "Time Stamp" ,
-          productAmount  : "Product Amount" ,
+          productAmount  : "Amount" ,
           productName    : "Product Name" ,
-          mintAmount     : "Token Amount" ,
-          tokenContract  : "tokenContract",
-          //  registrar      : "Registrar" ,
-          fileHash       : "File Hash" ,
-          adrCloudStorage: "File Storage Link" ,
+          mintAmount     : "mintAmount" ,
+          tokenContract  : "tokenContract", // > Token Name
+          // tokenTxHash    : "tokenTxHash"
+          // registrar      : "Registrar" ,
+          fileHash       : "fileHash" ,
+          // adrCloudStorage: "File Storage Link" ,
           metadata       : "Metadata"
         };
 
@@ -163,14 +174,23 @@ export default {
             const item  = await this.contract.methods.getItembyIndex(this.owner_address, index).call();
             console.log("item =", index, item);
             let row = {};
-            for (let key in header) {
-               console.log(key, header[key]);
-              if (key == 'blockTimestamp')
-                row[header[key]] = new Date(item[key]*1000).toLocaleString(undefined, {dateStyle:'medium',timeStyle:'medium'});
-              else
-                row[header[key]] = item[key];
-            }
-            row.documents = "<a href='" + ipfs_view + item.fileHash + "' target='_blank'>" + "[Documents]" + "</a>";
+
+            row[header.id] = item.id;
+
+            row[header.blockTimestamp] = new Date(item.blockTimestamp*1000).toLocaleString(undefined, {dateStyle:'medium',timeStyle:'medium'});
+
+            row[header.productAmount] = item.productAmount;
+
+            row[header.productName] = item.productName;
+
+            row[header.mintAmount] = "<a href='" + "LINK-TxMintHash" + "' target='_blank'>" + item.mintAmount + "</a>";
+
+            row[header.tokenContract] = "<a href='" + item.tokenContract + "' target='_blank'>" + item.tokenContract + "</a>";
+
+            row[header.fileHash] = "<a href='" + ipfs_view + item.fileHash + "' target='_blank'>" + item.fileHash + "</a>";
+
+            // row.documents = "<a href='" + ipfs_view + item.fileHash + "' target='_blank'>" + "[Documents]" + "</a>";
+
             console.log(index, row);
             this.items.push(row);
           }
