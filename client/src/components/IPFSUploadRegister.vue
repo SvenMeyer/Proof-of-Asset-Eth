@@ -183,6 +183,8 @@ export default {
               this.networkId = await web3.eth.net.getId();
               console.log("networkId =", this.networkId);
         }
+        console.log("this.form.token_index =", this.form.token_index)
+        console.log("token_config.tokens =", token_config.tokens)
         let token_contract_address = token_config.tokens[this.form.token_index].addresses[this.networkId];
         console.log({token_contract_address});
 
@@ -194,8 +196,13 @@ export default {
         const accounts = await web3.eth.getAccounts();
 
         console.log("minting", this.form.token_amount, token_name, "for", accounts[0])
-        let result_mint = await token_contract.methods.mint(accounts[0], parseInt(this.form.token_amount)).call();
+        let balance = await token_contract.methods.balanceOf(accounts[0]).call();
+        console.log("balance =", balance);
+        let result_mint = await token_contract.methods.mint(accounts[0], this.form.token_amount.toString() ).send({ from: accounts[0], gas: 1e6, gasPrice: 1e6 }); // web3.utils.toBN(
         console.log({result_mint})
+        balance = await token_contract.methods.balanceOf(accounts[0]).call();
+        console.log("balance =", balance);
+        console.log("end mint ---------------------------")
 
         // -------------------------------------------
 
@@ -236,11 +243,11 @@ export default {
             this.ipfs_hash,
             "ipfs://",
             this.form.product_name,
-            parseInt(this.form.product_amount),
+            this.form.product_amount.toString(),
             this.form.notes,
             token_contract_address,
             // token_mint_tx_hash,
-            parseInt(this.form.token_amount)
+            this.form.token_amount.toString()
           ).send({ from: accounts[0], gas: 4e6, gasPrice: 1e6 });
 
           console.log("result =", this.result);
