@@ -256,7 +256,8 @@ export default {
         // Get the user's accounts.
         const accounts = await web3.eth.getAccounts();
 
-        console.log("minting", this.form.token_amount, token.name + ' (', + token.symbol + ") with " + token.decimals + " for", accounts[0]);
+        console.log("minting", this.form.token_amount, token.name + ' (' + token.symbol + ") with " + token.decimals + " for", accounts[0]);
+        console.log(token);
         let balance = await token_contract.methods.balanceOf(accounts[0]).call();
         let token_amount_int = parseFloat(this.form.token_amount) * (10 ** token.decimals);
         console.log("balance =", balance);
