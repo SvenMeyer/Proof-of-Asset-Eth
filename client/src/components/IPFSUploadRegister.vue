@@ -21,7 +21,6 @@
       </b-button>
     </b-form>
 
-
     <div class="mt-5">
       <p class="lead">Provide Product Information and define Token mint process:</p>
 
@@ -30,27 +29,52 @@
         <b-form-group id="input-group-1">
 
           <b-form-group id="input-group-hash" label-cols-sm="4" label-cols-lg="3" label="File Hash" label-for="hash">
-            <b-form-input id="hash" v-model="ipfs_hash" required></b-form-input>
+            <b-form-input
+              id="hash"
+              v-model="ipfs_hash"
+              :state="ipfs_hash.length > 0"
+              required>
+            </b-form-input>
           </b-form-group>
 
           <b-form-group id="input-group-product-name" label-cols-sm="4" label-cols-lg="3" label="Product Name" label-for="product-name">
-            <b-form-input id="product-name" v-model="form.product_name" required></b-form-input>
+            <b-form-input
+              id="product-name"
+              v-model="form.product_name"
+              :state="form.product_name.length > 0"
+              required>
+            </b-form-input>
           </b-form-group>
 
           <b-form-group id="input-group-product-amount" label-cols-sm="4" label-cols-lg="3" label="Product Amount" label-for="product-amount">
-            <b-form-input id="product-amount" v-model="form.product_amount" required></b-form-input>
+            <b-form-input
+              id="product-amount"
+              v-model="form.product_amount"
+              :state="!isNaN(parseFloat(form.product_amount)) && isFinite(form.product_amount)"
+              required>
+            </b-form-input>
           </b-form-group>
 
           <b-form-group id="input-group-token-name" label-cols-sm="4" label-cols-lg="3" label="Token Name" label-for="token-name">
-            <b-form-select id="token-name" v-model="form.token_index" :options="token_options"></b-form-select>
+            <b-form-select
+              id="token-name"
+              v-model="form.token_index"
+              :options="token_options"
+              :state="Boolean(form.token_index != null)">
+            </b-form-select>
           </b-form-group>
 
           <b-form-group id="input-group-token-amount" label-cols-sm="4" label-cols-lg="3" label="Token Amount" label-for="token-amount">
-            <b-form-input id="token-amount" v-model="form.token_amount" required></b-form-input>
+            <b-form-input
+              id="token-amount"
+              v-model="form.token_amount"
+              :state="!isNaN(parseFloat(form.token_amount)) && isFinite(form.token_amount)"
+              required>
+            </b-form-input>
           </b-form-group>
 
-          <b-form-group id="input-group-notes" label-cols-sm="4" label-cols-lg="3" label="MetaData / Notes:" label-for="notes">
-            <b-form-input id="notes" v-model="form.notes" required></b-form-input>
+          <b-form-group id="input-group-metadata" label-cols-sm="4" label-cols-lg="3" label="Metadata:" label-for="metadata">
+            <b-form-input id="metadata" v-model="form.metadata"></b-form-input>
           </b-form-group>
 
           <b-button @click="handleRegister" type="button">Register on Blockchain</b-button>
@@ -77,7 +101,7 @@ import ViewBlockMixin from '@/mixins/viewBlock'
 import ProofOfAssetContract from "@/contracts/ProofOfAsset.json";
 import FECoinContract       from "@/contracts/FECoin.json";
 import getWeb3 from "@/lib/getWeb3"
-// import Contract from "@/lib/Contract"
+import ERC20Info from "@/lib/ERC20Info";
 
 import * as token_config from "@/config.json";  // copy of 0x-launch-kit-frontend/src/config.json
 
@@ -102,7 +126,7 @@ export default {
         product_amount: 0,
         token_index : null,
         token_amount: 0,
-        notes: ""
+        metadata: ""
       },
 
       token_options: [
@@ -156,6 +180,7 @@ export default {
 
   methods: {
 
+    // handle [Upload to IPFS] button
     handleOk() {
       if (!this.fileObject) {
         alert("Please select a file to upload.");
@@ -225,17 +250,17 @@ export default {
 
         let token_contract = new web3.eth.Contract(FECoinContract.abi, token_contract_address);
         console.log({token_contract})
-        let token_name  = await token_contract.methods.name().call();
+        // let token_name  = await token_contract.methods.name().call();
+        let token = await ERC20Info.get(web3, token_contract_address);
 
         // Get the user's accounts.
         const accounts = await web3.eth.getAccounts();
 
-        console.log("minting", this.form.token_amount, token_name, "for", accounts[0])
+        console.log("minting", this.form.token_amount, token.name + ' (', + token.symbol + ") with " + token.decimals + " for", accounts[0]);
         let balance = await token_contract.methods.balanceOf(accounts[0]).call();
+        let token_amount_int = parseFloat(this.form.token_amount) * (10 ** token.decimals);
         console.log("balance =", balance);
-        let result_mint = await token_contract.methods.mint(
-          accounts[0],
-          this.form.token_amount.toString() )
+        let result_mint = await token_contract.methods.mint(accounts[0], token_amount_int.toString())
           .send({ from: accounts[0], gas: 1e6, gasPrice: 1e6 });
         console.log({result_mint})
         this.txHashMint = result_mint.transactionHash;
@@ -270,17 +295,18 @@ export default {
 
         if (this.contract) {
           let owner = await this.contract.methods.owner().call();
-          console.log("owner =", owner)
+          console.log("owner =", owner);
           console.log("calling : contract.methods.addItem()");
+          console.log("token_amount_int.toString() =", token_amount_int.toString());
           this.result  = await this.contract.methods.addItem(
             this.ipfs_hash,
             this.txHashMint, // actually storage variable - TODO
             this.form.product_name,
-            this.form.product_amount.toString(),
-            this.form.notes,
+            this.form.product_amount,
+            this.form.metadata,
             token_contract_address,
             // token_mint_tx_hash,
-            this.form.token_amount.toString()
+            token_amount_int.toString(),
           ).send({ from: accounts[0], gas: 4e6, gasPrice: 1e6 });
 
           console.log("result =", this.result);
@@ -313,7 +339,7 @@ export default {
       token_config.tokens.forEach((token, index) => {
         this.token_options.push({value: index, text: token.symbol + " - " + token.name})
       });
-
+      console.log("token_options =", this.token_options);
     } catch(err) {
       /* eslint-disable */
     }
