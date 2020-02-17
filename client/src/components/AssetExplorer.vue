@@ -127,6 +127,13 @@ export default {
 
   methods: {
 
+    // works better than build in version to get a fixed number of decimals
+    // https://stackoverflow.com/questions/661562/how-to-format-a-float-in-javascript
+    toFixed(value, precision) {
+      var power = Math.pow(10, precision || 0);
+      return String(Math.round(value * power) / power);
+    },
+
     async searchItems() {
       console.log("searchItems");
 
@@ -197,7 +204,8 @@ export default {
 
             row[header.productName] = item.productName;
 
-            row[header.mintAmount] = item.mintAmount / (10 ** token.decimals)
+
+            row[header.mintAmount] = this.toFixed(item.mintAmount / (10 ** token.decimals), token.decimals < 6 ? token.decimals : 6)
                                     + "<br/>" + "<a href='" + item.adrCloudStorage + "' target='_blank'>" + '[mint Tx]' + "</a>"; // TODO
                                     // + "<br/>" + "<a href='" + item.tokenMintTx + "' target='_blank'>" + '[mint TX]' + "</a>";
 
