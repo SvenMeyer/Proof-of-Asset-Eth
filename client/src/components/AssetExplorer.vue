@@ -15,21 +15,26 @@
         required>
       </b-form-input>
       <b-input-group-append>
-        <b-button @click="searchItems" type="button" variant="primary" :disabled="!readyToSearch">Search</b-button>
+        <b-button @click="searchItems" type="button" :disabled="!readyToSearch">Search</b-button>
       </b-input-group-append>
     </b-input-group>
 
-    <b-table bordered striped hover :items="items">
+    <b-table bordered striped hover
+      :items="items"
+    >
+    <!-- :fields="fields" -->
 
-      <template v-slot:cell(block_number)="block">
-        <span v-html="block.value"></span>
-      </template>
+      <!-- cell(...) has to be a copy of the value of the header[] mapping table -->
 
       <template v-slot:cell(mintAmount)="data">
         <span v-html="data.value"></span>
       </template>
 
       <template v-slot:cell(tokenContract)="data">
+        <span v-html="data.value"></span>
+      </template>
+
+      <template v-slot:cell(Registrar)="data">
         <span v-html="data.value"></span>
       </template>
 
@@ -74,8 +79,10 @@ import ViewBlockMixin from '@/mixins/viewBlock'
 import {ipfs, ipfs_view} from "@/mixins/ipfs";
 
 // standard imports
-import getWeb3 from "@/lib/getWeb3";
+import getWeb3   from "@/lib/getWeb3";
+import ERC20Info from "@/lib/ERC20Info";
 import ProofOfAssetContract from "@/contracts/ProofOfAsset.json";
+
 
 export default {
 
@@ -100,7 +107,9 @@ export default {
       owner_address: null,
       errorMsg: null,
       items: [],
-
+      // fields: [
+      //   { key: 'productAmount', label: 'productAmount', class: 'text-right' },
+      // ],
     };
   },
 
@@ -149,31 +158,36 @@ export default {
         const header = {
           id             : "ID",
           blockTimestamp : "Time Stamp" ,
-          productAmount  : "Amount" ,
+          productAmount  : "productAmount" ,
           productName    : "Product Name" ,
           mintAmount     : "mintAmount" ,
           tokenContract  : "tokenContract", // > Token Name
-          // tokenTxHash    : "tokenTxHash"
-          // registrar      : "Registrar" ,
+          // tokenMintTx    : "tokenMintTx"
+          registrar      : "Registrar" ,
           fileHash       : "fileHash" ,
-          // adrCloudStorage: "File Storage Link" ,
+          // adrCloudStorage: "File Storage Link" , // we will use this for tokenMintTx
           metadata       : "Metadata"
         };
 
 
         if (this.contract) {
-          console.log("calling : contract.methods.getNumberOfItems()");
 
-          // do not cache - start with an empty table
-          this.items = [];
+          console.log("calling : contract.methods.getNumberOfItems()");
 
           let n = await this.contract.methods.getNumberOfItems(this.owner_address).call();
           console.log("number of items is now : ", n);
+
+          // do not cache - start with an empty table
+          this.items = [];
 
           for (let index = n-1; index >= 0; index--) {
             const item  = await this.contract.methods.getItembyIndex(this.owner_address, index).call();
             console.log("item =", index, item);
             let row = {};
+
+            // get name, symbol, decimals for token from address
+            let token = await ERC20Info.get(this.web3, item.tokenContract);
+            console.log(item.tokenContract, token);
 
             row[header.id] = item.id;
 
@@ -183,13 +197,16 @@ export default {
 
             row[header.productName] = item.productName;
 
-            row[header.mintAmount] = "<a href='" + "LINK-TxMintHash" + "' target='_blank'>" + item.mintAmount + "</a>";
+            row[header.mintAmount] = item.mintAmount / (10 ** token.decimals)
+                                    + "<br/>" + "<a href='" + item.adrCloudStorage + "' target='_blank'>" + '[mint Tx]' + "</a>"; // TODO
+                                    // + "<br/>" + "<a href='" + item.tokenMintTx + "' target='_blank'>" + '[mint TX]' + "</a>";
 
-            row[header.tokenContract] = "<a href='" + item.tokenContract + "' target='_blank'>" + item.tokenContract + "</a>";
+            row[header.tokenContract] = "<a href='" + item.tokenContract + "' target='_blank'>" + token.name + " (" + token.symbol + ")"
+                                      + "<br/>" + item.tokenContract + "</a>";
+
+            row[header.registrar] = "<a href='" + item.registrar + "' target='_blank'>" + item.registrar + "</a>";
 
             row[header.fileHash] = "<a href='" + ipfs_view + item.fileHash + "' target='_blank'>" + item.fileHash + "</a>";
-
-            // row.documents = "<a href='" + ipfs_view + item.fileHash + "' target='_blank'>" + "[Documents]" + "</a>";
 
             console.log(index, row);
             this.items.push(row);

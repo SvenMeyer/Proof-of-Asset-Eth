@@ -1,14 +1,18 @@
 export default {
   data() {
     return {
-      viewBlockUrl: 'https://viewblock.io/zilliqa'
+      linkAddress: "https://" + this.networkName + ".etherscan.io/address/",
+      linkTx: "https://" + this.networkName + ".etherscan.io/tx/"
     };
   },
   methods: {
-    explore(id, type='tx') {
-      // eslint-disable-next-line
-      const network = !!window.zilPay ? window.zilPay.wallet.net : 'testnet';
-      return `${this.viewBlockUrl}/${type}/${id}?network=${network}`;
-    }
+    hashLink(hash, type='tx') {
+      if (this.networkName == 'main') {
+        return "https://etherscan.io/" + type + '/' + hash;
+      } else if (this.networkName)
+        return "https://" + this.networkName + ".etherscan.io/" + type + '/' + hash;
+      else
+        return '';
+    },
   }
 };

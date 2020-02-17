@@ -1,6 +1,8 @@
 pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;   // required to pass structs as function parameter and return values
 
+import "./FECoin_remix.sol";
+
 /// @title  ProofOfAsset
 /// @author Sven Meyer
 /// @notice only implements very basic functionality (add, retrieve)

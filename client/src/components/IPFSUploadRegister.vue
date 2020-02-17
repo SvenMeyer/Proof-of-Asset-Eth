@@ -269,14 +269,12 @@ export default {
         }
 
         if (this.contract) {
-          console.log(this.contract)
-          console.log("getting owner of contract");
           let owner = await this.contract.methods.owner().call();
           console.log("owner =", owner)
           console.log("calling : contract.methods.addItem()");
           this.result  = await this.contract.methods.addItem(
             this.ipfs_hash,
-            "ipfs://",
+            this.txHashMint, // actually storage variable - TODO
             this.form.product_name,
             this.form.product_amount.toString(),
             this.form.notes,
