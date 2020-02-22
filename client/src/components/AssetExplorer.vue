@@ -30,7 +30,7 @@
         <span v-html="data.value"></span>
       </template>
 
-      <template v-slot:cell(tokenContract)="data">
+      <template v-slot:cell(tokenContractAddress)="data">
         <span v-html="data.value"></span>
       </template>
 
@@ -80,8 +80,8 @@ import {ipfs, ipfs_view} from "@/mixins/ipfs";
 
 // standard imports
 import getWeb3   from "@/lib/getWeb3";
-import ERC20Info from "@/lib/ERC20Info";
-import ProofOfAssetContract from "@/contracts/ProofOfAsset.json";
+// import ERC20Info from "@/lib/ERC20Info";
+import ProofOfAssetMintContract from "@/contracts/ProofOfAssetMint.json";
 
 
 export default {
@@ -167,12 +167,12 @@ export default {
             this.networkId = await this.web3.eth.net.getId();
             console.log("networkId =", this.networkId);
           }
-          this.deployedNetworkIDs = Object.keys(ProofOfAssetContract.networks);
+          this.deployedNetworkIDs = Object.keys(ProofOfAssetMintContract.networks);
           console.log("deployedNetworkIDs =", this.deployedNetworkIDs);
           if (this.deployedNetworkIDs.includes(this.networkId.toString())) {
             this.contract = new this.web3.eth.Contract(
-              ProofOfAssetContract.abi,
-              ProofOfAssetContract.networks[this.networkId].address
+              ProofOfAssetMintContract.abi,
+              ProofOfAssetMintContract.networks[this.networkId].address
             );
           } else {
             error_message = "Selected network_id is " + this.networkId +
@@ -190,7 +190,7 @@ export default {
           productAmount  : "productAmount" ,
           productName    : "Product Name" ,
           mintAmount     : "mintAmount" ,
-          tokenContract  : "tokenContract", // > Token Name
+          tokenContractAddress  : "tokenContractAddress", // > Token Name
           // tokenMintTx    : "tokenMintTx"
           registrar      : "Registrar" ,
           fileHash       : "fileHash" ,
@@ -215,8 +215,13 @@ export default {
             let row = {};
 
             // get name, symbol, decimals for token from address
-            let token = await ERC20Info.get(this.web3, item.tokenContract);
-            console.log(item.tokenContract, token);
+            // let token = await ERC20Info.get(this.web3, item.tokenContract); // ***TODO***
+            // console.log(item.tokenContract, token);
+
+            let token = {};  // ***TODO***
+            token.decimals = 18;
+            token.symbol = 'FEC1';
+            token.name   = "Iron Ore Token Type 1";
 
             row[header.id] = item.id;
 
@@ -226,13 +231,10 @@ export default {
 
             row[header.productName] = item.productName;
 
-            if (item.adrCloudStorage)
-              item.tokenMintTx = item.adrCloudStorage;  // TEST ONLY - remove TODO
-
             row[header.mintAmount] = this.toFixed(item.mintAmount / (10 ** token.decimals), token.decimals < 6 ? token.decimals : 6)
                                     + "<br/>" + "<a href='" + this.hashLink(item.tokenMintTx, 'tx') + "' target='_blank'>" + '[mint Tx]' + "</a>"; // TODO
 
-            row[header.tokenContract] = "<a href='" + this.hashLink(item.tokenContract, 'address') + "' target='_blank'>"
+            row[header.tokenContractAddress] = "<a href='" + this.hashLink(item.tokenContractAddress, 'address') + "' target='_blank'>"
                                       + token.name + " (" + token.symbol + ")"
                                       + "<br/>" + item.tokenContract + "</a>";
 

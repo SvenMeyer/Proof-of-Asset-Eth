@@ -1,6 +1,3 @@
-/* eslint-disable no-empty */
-/* eslint-disable no-empty */
-/* eslint-disable no-empty */
 <template>
   <b-jumbotron>
     <!--
@@ -98,10 +95,10 @@ import LoadMixin from '@/mixins/loader'
 import ViewBlockMixin from '@/mixins/viewBlock'
 
 // import networks from '@/lib/global_config';
-import ProofOfAssetContract from "@/contracts/ProofOfAsset.json";
-import FECoinContract       from "@/contracts/FECoin.json";
-import getWeb3 from "@/lib/getWeb3"
-import ERC20Info from "@/lib/ERC20Info";
+import ProofOfAssetMintContract from "@/contracts/ProofOfAssetMint.json";
+// import FECoinContract       from "@/contracts/FECoin.json";
+import getWeb3   from "@/lib/getWeb3"
+// import ERC20Info from "@/lib/ERC20Info";
 
 import * as token_config from "@/config.json";  // copy of 0x-launch-kit-frontend/src/config.json
 
@@ -247,14 +244,13 @@ export default {
         console.log("token_config.tokens =", token_config.tokens)
         let token_contract_address = token_config.tokens[this.form.token_index].addresses[this.networkId];
         console.log({token_contract_address});
-
+/*
         let token_contract = new web3.eth.Contract(FECoinContract.abi, token_contract_address);
         console.log({token_contract})
         // let token_name  = await token_contract.methods.name().call();
         let token = await ERC20Info.get(web3, token_contract_address);
 
-        // Get the user's accounts.
-        const accounts = await web3.eth.getAccounts();
+
 
         console.log("minting", this.form.token_amount, token.name + ' (' + token.symbol + ") with " + token.decimals + " for", accounts[0]);
         console.log(token);
@@ -269,6 +265,10 @@ export default {
         console.log("balance =", balance);
 
         console.log("end mint ---------------------------")
+*/
+        let token_amount_int = parseFloat(this.form.token_amount) * (10 ** 18);
+
+        const accounts = await web3.eth.getAccounts();
 
         let error_message;
 
@@ -277,12 +277,12 @@ export default {
             this.networkId = await web3.eth.net.getId();
             console.log("networkId =", this.networkId);
           }
-          this.deployedNetworkIDs = Object.keys(ProofOfAssetContract.networks);
+          this.deployedNetworkIDs = Object.keys(ProofOfAssetMintContract.networks);
           console.log("deployedNetworkIDs =", this.deployedNetworkIDs);
           if (this.deployedNetworkIDs.includes(this.networkId.toString())) {
             this.contract = new web3.eth.Contract(
-              ProofOfAssetContract.abi,
-              ProofOfAssetContract.networks[this.networkId].address
+              ProofOfAssetMintContract.abi,
+              ProofOfAssetMintContract.networks[this.networkId].address
             );
           } else {
             error_message = "Selected network_id is " + this.networkId +
@@ -299,15 +299,22 @@ export default {
           console.log("owner =", owner);
           console.log("calling : contract.methods.addItem()");
           console.log("token_amount_int.toString() =", token_amount_int.toString());
+
+          /*
+          function addItem(
+              string memory _fileHash,
+              uint   _productAmount,
+              string memory _productName,
+              uint    _mintAmount,
+              string memory _metadata)
+          */
+
           this.result  = await this.contract.methods.addItem(
             this.ipfs_hash,
-            this.txHashMint, // actually storage variable - TODO
+            Math.round(this.form.product_amount * 10e18).toString(),
             this.form.product_name,
-            this.form.product_amount,
-            this.form.metadata,
-            token_contract_address,
-            // token_mint_tx_hash,
             token_amount_int.toString(),
+            this.form.metadata,
           ).send({ from: accounts[0], gas: 4e6, gasPrice: 1e6 });
 
           console.log("result =", this.result);

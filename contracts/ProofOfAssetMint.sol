@@ -92,13 +92,13 @@ contract ProofOfAssetMint {
 	/// @dev add a new item to the collection
 	/// @dev emits eventAddItem event
 
-	function addItem(string memory _fileHash,
-	                uint   _productAmount,
-					string memory _productName,
-					// address _tokenContract,
-                    uint    _mintAmount,
-                    string memory _metadata)
-                    public
+	function addItem(
+			string memory _fileHash,
+	    uint   _productAmount,
+			string memory _productName,
+      uint    _mintAmount,
+      string memory _metadata)
+      public
 	{
 		// check if any parameter is too long / out of scope
 
