@@ -1,5 +1,5 @@
-var ProofOfAsset = artifacts.require("./ProofOfAsset.sol");
+var ProofOfAssetMint = artifacts.require("./ProofOfAssetMint.sol");
 
 module.exports = function (deployer) {
-  deployer.deploy(ProofOfAsset);
+  deployer.deploy(ProofOfAssetMint);
 };
