@@ -102,8 +102,10 @@ export default {
 
   data() {
     return {
-      mounted: false,
-      web3: null,
+      mounted:     false,
+      web3:        null,
+      networkName: '',
+      accounts:    [],
       owner_address: null,
       errorMsg: null,
       items: [],
@@ -132,6 +134,26 @@ export default {
     toFixed(value, precision) {
       var power = Math.pow(10, precision || 0);
       return String(Math.round(value * power) / power);
+    },
+
+    async getNetworkInfo() {
+      try {
+        this.web3 = await getWeb3();
+        console.log("web3 =", this.web3);
+        console.log("web3.version = ", this.web3.version);
+        console.log("web3.networkVersion =", this.web3.networkVersion);
+
+        this.networkName = await this.web3.eth.net.getNetworkType();
+        console.log("this.networkName =", this.networkName);
+
+        console.log("requesting account access");
+        this.accounts = await this.web3.eth.getAccounts();
+        this.owner_address = this.accounts[0];
+        console.log("owner_address =", this.owner_address);
+      }
+      catch(error) {
+        console.log("Could not access accounts. error :", error)
+      }
     },
 
     async searchItems() {
@@ -200,19 +222,21 @@ export default {
 
             row[header.blockTimestamp] = new Date(item.blockTimestamp*1000).toLocaleString(undefined, {dateStyle:'medium',timeStyle:'medium'});
 
-            row[header.productAmount] = item.productAmount;
+            row[header.productAmount] = item.productAmount / 10e18;
 
             row[header.productName] = item.productName;
 
+            if (item.adrCloudStorage)
+              item.tokenMintTx = item.adrCloudStorage;  // TEST ONLY - remove TODO
 
             row[header.mintAmount] = this.toFixed(item.mintAmount / (10 ** token.decimals), token.decimals < 6 ? token.decimals : 6)
-                                    + "<br/>" + "<a href='" + item.adrCloudStorage + "' target='_blank'>" + '[mint Tx]' + "</a>"; // TODO
-                                    // + "<br/>" + "<a href='" + item.tokenMintTx + "' target='_blank'>" + '[mint TX]' + "</a>";
+                                    + "<br/>" + "<a href='" + this.hashLink(item.tokenMintTx, 'tx') + "' target='_blank'>" + '[mint Tx]' + "</a>"; // TODO
 
-            row[header.tokenContract] = "<a href='" + item.tokenContract + "' target='_blank'>" + token.name + " (" + token.symbol + ")"
+            row[header.tokenContract] = "<a href='" + this.hashLink(item.tokenContract, 'address') + "' target='_blank'>"
+                                      + token.name + " (" + token.symbol + ")"
                                       + "<br/>" + item.tokenContract + "</a>";
 
-            row[header.registrar] = "<a href='" + item.registrar + "' target='_blank'>" + item.registrar + "</a>";
+            row[header.registrar] = "<a href='" + this.hashLink(item.registrar, 'address') + "' target='_blank'>" + item.registrar + "</a>";
 
             row[header.fileHash] = "<a href='" + ipfs_view + item.fileHash + "' target='_blank'>" + item.fileHash + "</a>";
 
@@ -230,31 +254,9 @@ export default {
 
   mounted() {
     this.mounted = true;
-    try {
-      // this.observableAccount();
-              // Get network provider and web3 instance.
-        console.log("getting web3 ...")
-
-        getWeb3()
-        .then(_web3 => {
-          this.web3 = _web3;
-          console.log("web3 =", this.web3);
-          console.log("web3.version = ", this.web3.version);
-          console.log("web3.networkVersion =", this.web3.networkVersion);
-          console.log("requesting account access");
-          this.web3.eth.getAccounts();
-        })
-        .then(accounts => {
-            this.owner_address = accounts[0];
-            console.log("owner_address =", this.owner_address);
-        })
-        .catch(error => {
-          console.log("Could not access accounts. error :", error)
-        })
-    } catch(err) {
-      /* eslint-disable */
-    }
+    this.getNetworkInfo();
   }
+
 }
 </script>
 
