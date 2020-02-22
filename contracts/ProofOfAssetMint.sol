@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;   // required to pass structs as function parameter and return values
 
-import "./FECoin_remix.sol";
+import "./FECoin.sol";
 
 /// @title  ProofOfAsset
 /// @author Sven Meyer
@@ -13,20 +13,27 @@ import "./FECoin_remix.sol";
 // import "@openzeppelin/contracts/ownership/Ownable.sol";
 // contract ProofOfAsset is Ownable {
 
-contract ProofOfAsset {
+contract ProofOfAssetMint {
 
 	address public owner;
+	// address public tokenContractAddress;
+	FECoin  public tokenContract;
 
 	constructor() public {
 		owner = msg.sender;
 	}
 
+	function setTokenContractAddress(address _tokenContractAddress) public {  // add onlyOwner TODO
+		// tokenContractAddress = _tokenContractAddress;  // redundant - remove later : TODO
+		tokenContract = FECoin(_tokenContractAddress);
+	}
+
 	// set / get price for a registration transaction
 
-	uint private price;
+	uint private price;  // we may want to do some internal price calculations in the future
 
-	function setPrice(uint x) public {
-		price = x;
+	function setPrice(uint new_price) public {  // add onlyOwner TODO
+		price = new_price;
 	}
 
 	function getPrice() public view returns (uint) {
@@ -48,14 +55,14 @@ contract ProofOfAsset {
 	struct Item {
 		uint     id;               // index of item starting with 0
 		uint     blockTimestamp;   // timestamp of registration
-		uint     productAmount;    // amount of product
-		uint     mintAmount;       // number of token minted for this registration
-		address  tokenContract;    // address of token to mint
+		uint     productAmount;    // amount of product (18 decimal digits fractional part) > ufixed TODO?
+		uint     mintAmount;       // number of token minted for this registration > ufixed TODO?
+		address  tokenContractAddress;    // address of token to mint
 		address  registrar;        // registrar of item
 		string   fileHash;         // hash of file (= IPFS storage location)
-		string   adrCloudStorage;  // backup / 2nd cloud storage location
+		// string   tokenMintTx;      // token mint transaction
 		string   productName;      // name of product
-		string   metadata;         // (optional) additional metadata
+		string   metadata;         // (optional) additional metadata, JSON format recommended)
 	}
 
 	uint itemCount = 0; // private - we do not want direct access to it
@@ -85,37 +92,51 @@ contract ProofOfAsset {
 	/// @dev add a new item to the collection
 	/// @dev emits eventAddItem event
 
-	function addItem( string memory _fileHash,
-                    string memory _adrCloudStorage,
-										string memory _productName,
-										uint   _productAmount,
-                    string memory _metadata,
-										address _tokenContract,
-                    uint    _mintAmount)
-                    public {
-		// if parameter not too long
-		// if item does not already exist
-		// if payment >= (price * mint_amount)
+	function addItem(string memory _fileHash,
+	                uint   _productAmount,
+					string memory _productName,
+					// address _tokenContract,
+                    uint    _mintAmount,
+                    string memory _metadata)
+                    public
+	{
+		// check if any parameter is too long / out of scope
+
+		// check if item does not already exist
+        require(itemByHash[_fileHash].registrar == address(0), "item hash is already registere");
+
+        // TODO implement payable contract
+		// require(msg.value (uint) == price, "amount sent does not match price");  // number of wei sent with the message
+
+        // check if a token contract has been set
+		require(address(tokenContract) != address(0), 'No token contract defined');
+
+		bool tokenMintResult = tokenContract.mint(tx.origin, _mintAmount);
+
+		require(tokenMintResult, "Token mint process failed");
+
 		Item memory item = Item({
 			id              : itemCount,
 			registrar       : msg.sender,  // tx.origin ? https://solidity.readthedocs.io/en/v0.5.3/security-considerations.html#tx-origin
-			blockTimestamp  : block.timestamp,
+			blockTimestamp  : block.timestamp,  // do we actually have to store that explicitly? TODO?
 			productName     : _productName,
 			productAmount   : _productAmount,
-			tokenContract   : _tokenContract,
+			tokenContractAddress : address(tokenContract), // tokenContract.address, .this (current contract’s type): the current contract, explicitly convertible to address // TODO
 			mintAmount      : _mintAmount,
 			fileHash        : _fileHash,
-			adrCloudStorage : _adrCloudStorage,
+			// tokenMintTx     : tokenMintResult,
 			metadata        : _metadata
 		});
-		items[itemCount] = item;
-		itemCount++;
-		// add to registrar > item mapping
-		itemsOfRegistrar[msg.sender].push(item);
-		// add to hash > item mapping
+
+	    // add new item to mapping : hash -> item
 		itemByHash[_fileHash] = item;
-		// mint token
-		// _tokenContract.mint(_mintAmount, msg.sender);  // TODO
+
+		// add new item to mapping : id -> item
+		items[itemCount++] = item;
+
+		// add new item to registrar.array[] > item
+		itemsOfRegistrar[msg.sender].push(item);
+
 		emit eventAddItem(int(itemCount - 1));
 	}
 
