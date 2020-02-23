@@ -89,7 +89,7 @@
 
       </b-form>
 
-      <p class="text-monospace">Tx Hash Mint: <b-link :href=txHashMintLink :disabled="!txHashMint" target="_blank">{{ txHashMint }}</b-link></p>
+      <p class="text-monospace">Tx Hash : <b-link :href=txHashPOALink :disabled="!txHashPOA" target="_blank">{{ txHashPOA }}</b-link></p>
       <p class="text-monospace">validForm = {{ validForm }}</p>
 
     </div>
@@ -107,6 +107,7 @@ import ViewBlockMixin from '@/mixins/viewBlock'
 import ProofOfAssetMintContract from "@/contracts/ProofOfAssetMint.json";
 // import FECoinContract       from "@/contracts/FECoin.json";
 import getWeb3   from "@/lib/getWeb3"
+import MathUtils from "@/lib/MathUtils.mjs"
 // import ERC20Info from "@/lib/ERC20Info";
 
 import * as token_config from "@/config.json";  // copy of 0x-launch-kit-frontend/src/config.json
@@ -278,8 +279,8 @@ export default {
 
         console.log("this.form.token_index =", this.form.token_index)
         console.log("token_config.tokens =", token_config.tokens)
-        let token_contract_address = token_config.tokens[this.form.token_index].addresses[this.networkId];
-        console.log({token_contract_address});
+        // let token_contract_address = token_config.tokens[this.form.token_index].addresses[this.networkId];
+        // console.log({token_contract_address});
 /*
         let token_contract = new web3.eth.Contract(FECoinContract.abi, token_contract_address);
         console.log({token_contract})
@@ -336,9 +337,10 @@ export default {
 
           let tokenContract = await this.contract.methods.tokenContract().call();
           console.log({tokenContract})
+          console.log("tokenContract._address =", tokenContract._address)
 
-          let product_amount_String = (parseFloat(this.form.token_amount  ) * (10 ** 18)).toString();
-          let token_amount_String   = (parseFloat(this.form.product_amount) * (10 ** 18)).toString();
+          let product_amount_String = MathUtils.uint_fixedPoint_fromFloatSting(this.form.product_amount.toString(), 18);
+          let token_amount_String   = MathUtils.uint_fixedPoint_fromFloatSting(this.form.token_amount.toString(), 18);
 
           console.log("calling : contract.methods.addItem()");
           console.log("-----------------------------------------");
