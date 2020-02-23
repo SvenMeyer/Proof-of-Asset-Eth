@@ -3,9 +3,10 @@
 
     <b-navbar toggleable="lg" type="dark" variant="dark">
 
-      <b-navbar-brand href="#">Proof-of-Asset &amp; Token mint</b-navbar-brand>
+      <b-navbar-brand href="#">Proof-of-Asset &amp; Tokenization</b-navbar-brand>
 
       <!-- Right aligned nav items -->
+      <!--
       <b-navbar-nav class="ml-auto">
         <b-nav-item-dropdown :text=selectedNetwork right>
           <b-dropdown-item
@@ -17,7 +18,7 @@
           >{{ network }}</b-dropdown-item>
         </b-nav-item-dropdown>
       </b-navbar-nav>
-
+      -->
     </b-navbar>
 
     <!-- --------------------------------------------------------------------- -->
@@ -25,12 +26,21 @@
     <b-container fluid>
 
       <b-tabs content-class="mt-0" align="center">
-        <b-tab title="IPFS upload &amp; Registration" class="mx-auto" style="width: 896px;" active>
+
+        <b-tab title="Proof-of-Asset &amp; Tokenization"
+          class="mx-auto"
+          style="width: 896px;"
+          :title-link-class="['bg-secondary', 'text-light']"
+        active>
           <ipfs-upload-register/>
         </b-tab>
-        <b-tab title="Asset Explorer">
+
+        <b-tab title="Tokenized Asset Explorer"
+          :title-link-class="['bg-secondary', 'text-light']"
+        lazy>
           <asset-explorer :selectedNetwork="selectedNetwork"/>
         </b-tab>
+
       </b-tabs>
 
     </b-container>
