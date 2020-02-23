@@ -4,7 +4,7 @@
     <h3>IPFS Upload - Ethereum Blockchain Registration - Token mint</h3>
     <p></p>
     -->
-    <p class="lead">Upload document to IPFS:</p>
+    <p class="lead">Upload document file:</p>
     <!--
     <small class="lead text-danger">{{errorMsg}}</small>
     -->
@@ -13,7 +13,7 @@
       <div class="border-style">
         <b-form-file v-model="fileObject" ref="file-input" class="mb-2" autofocus multiple/>
       </div>
-      <b-button class="margin-xs" @click="handleOk">
+      <b-button class="margin-xs" @click="handleOk" :disabled="!fileObject">
         Upload to IPFS
       </b-button>
     </b-form>
@@ -29,7 +29,8 @@
             <b-form-input
               id="hash"
               v-model="ipfs_hash"
-              :state="ipfs_hash.length > 0"
+              type="text"
+              :state="validHash"
               required>
             </b-form-input>
           </b-form-group>
@@ -38,7 +39,8 @@
             <b-form-input
               id="product-name"
               v-model="form.product_name"
-              :state="form.product_name.length > 0"
+              type="text"
+              :state="validProductName"
               required>
             </b-form-input>
           </b-form-group>
@@ -47,7 +49,8 @@
             <b-form-input
               id="product-amount"
               v-model="form.product_amount"
-              :state="!isNaN(parseFloat(form.product_amount)) && isFinite(form.product_amount)"
+              type="number"
+              :state="validProductAmount"
               required>
             </b-form-input>
           </b-form-group>
@@ -57,7 +60,8 @@
               id="token-name"
               v-model="form.token_index"
               :options="token_options"
-              :state="Boolean(form.token_index != null)">
+              :state="validToken"
+            >
             </b-form-select>
           </b-form-group>
 
@@ -65,23 +69,28 @@
             <b-form-input
               id="token-amount"
               v-model="form.token_amount"
-              :state="!isNaN(parseFloat(form.token_amount)) && isFinite(form.token_amount)"
+              type="number"
+              :state="validTokenAmount"
               required>
             </b-form-input>
           </b-form-group>
 
           <b-form-group id="input-group-metadata" label-cols-sm="4" label-cols-lg="3" label="Metadata:" label-for="metadata">
-            <b-form-input id="metadata" v-model="form.metadata"></b-form-input>
+            <b-form-input
+              id="metadata"
+              v-model="form.metadata"
+              type="text">
+            </b-form-input>
           </b-form-group>
 
-          <b-button @click="handleRegister" type="button">Register on Blockchain</b-button>
+          <b-button @click="handleRegister" type="button" :disabled="!validForm">Register on Blockchain</b-button>
 
         </b-form-group>
 
       </b-form>
 
       <p class="text-monospace">Tx Hash Mint: <b-link :href=txHashMintLink :disabled="!txHashMint" target="_blank">{{ txHashMint }}</b-link></p>
-      <p class="text-monospace">Tx Hash POA : <b-link :href=txHashPOALink  :disabled="!txHashPOA"  target="_blank">{{ txHashPOA }} </b-link></p>
+      <p class="text-monospace">validForm = {{ validForm }}</p>
 
     </div>
   </b-jumbotron>
@@ -147,6 +156,33 @@ export default {
   },
 
   computed: {
+
+    validHash() {
+      return this.ipfs_hash.length >= 16;
+    },
+
+    validProductName() {
+      return this.form.product_name.length > 0;
+    },
+
+    validProductAmount() {
+      // return this.form.product_amount > 0;
+      return !isNaN(parseFloat(this.form.product_amount)) && isFinite(this.form.product_amount) && (parseFloat(this.form.product_amount) > 0)
+    },
+
+    validToken() {
+      // if form.token_amount == 0 then we do not have to select a token
+      return (this.form.token_index != null || (parseFloat(this.form.token_amount) == 0)) ? null : false;
+    },
+
+    validTokenAmount() {
+      // return this.form.token_amount > 0;
+      return (!isNaN(parseFloat(this.form.token_amount)) && isFinite(this.form.token_amount) && (parseFloat(this.form.token_amount) >= 0)) ? null : false;
+    },
+
+    validForm() {
+      return this.validHash && this.validProductName && this.validProductAmount && (this.validToken != false);
+    },
 
     validAddress() {
        return this.owner_address && (this.validateAddress(this.owner_address) !== null);
@@ -266,8 +302,6 @@ export default {
 
         console.log("end mint ---------------------------")
 */
-        let token_amount_int = parseFloat(this.form.token_amount) * (10 ** 18);
-
         const accounts = await web3.eth.getAccounts();
 
         let error_message;
@@ -295,10 +329,25 @@ export default {
         }
 
         if (this.contract) {
+          console.log("contract =", this.contract);
           let owner = await this.contract.methods.owner().call();
           console.log("owner =", owner);
+          console.log("accounts[0] =", accounts[0])
+
+          let tokenContract = await this.contract.methods.tokenContract().call();
+          console.log({tokenContract})
+
+          let product_amount_String = (parseFloat(this.form.token_amount  ) * (10 ** 18)).toString();
+          let token_amount_String   = (parseFloat(this.form.product_amount) * (10 ** 18)).toString();
+
           console.log("calling : contract.methods.addItem()");
-          console.log("token_amount_int.toString() =", token_amount_int.toString());
+          console.log("-----------------------------------------");
+          console.log("this.ipfs_hash         :", this.ipfs_hash)
+          console.log({product_amount_String});
+          console.log("this.form.product_name :", this.form.product_name)
+          console.log({token_amount_String});
+          console.log("this.form.metadata     :", this.form.metadata)
+          console.log("-----------------------------------------");
 
           /*
           function addItem(
@@ -311,9 +360,9 @@ export default {
 
           this.result  = await this.contract.methods.addItem(
             this.ipfs_hash,
-            Math.round(this.form.product_amount * 10e18).toString(),
+            product_amount_String,
             this.form.product_name,
-            token_amount_int.toString(),
+            token_amount_String,
             this.form.metadata,
           ).send({ from: accounts[0], gas: 4e6, gasPrice: 1e6 });
 
