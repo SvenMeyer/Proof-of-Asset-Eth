@@ -89,7 +89,7 @@
 
       </b-form>
 
-      <p class="text-monospace">Tx Hash : <b-link :href=txHashPOALink :disabled="!txHashPOA" target="_blank">{{ txHashPOA }}</b-link></p>
+      <p class="text-monospace">Tx Hash : <b-link :href="hashLink(txHashPOA, 'tx')" :disabled="!txHashPOA" target="_blank">{{ txHashPOA }}</b-link></p>
       <p class="text-monospace">validForm = {{ validForm }}</p>
 
     </div>
@@ -125,6 +125,7 @@ export default {
 
   data() {
     return {
+    //web3: null,
       show: true,
       fileObject: null,
       ipfs_hash: "",
@@ -189,27 +190,6 @@ export default {
        return this.owner_address && (this.validateAddress(this.owner_address) !== null);
     },
 
-    // Is there a better solution? Computed with parameter would be nice
-    // https://stackoverflow.com/questions/40522634/can-i-pass-parameters-in-computed-properties-in-vue-js
-
-    txHashMintLink() {
-      if (this.networkName == 'main') {
-        return "https://etherscan.io/tx/" + this.txHashMint;
-      } else if (this.networkName)
-        return "https://" + this.networkName + ".etherscan.io/tx/" + this.txHashMint;
-      else
-        return '';
-    },
-
-    txHashPOALink() {
-      if (this.networkName == 'main') {
-        return "https://etherscan.io/tx/" + this.txHashPOA;
-      } else if (this.networkName)
-        return "https://" + this.networkName + ".etherscan.io/tx/" + this.txHashPOA;
-      else
-        return '';
-    }
-
   },
 
   methods: {
@@ -255,16 +235,15 @@ export default {
     async handleRegister() {
       console.log("handleRegister : form =", this.form);
       console.log("ipfs_hash =", this.ipfs_hash);
+      console.log("token_index =", this.form.token_index);
+
+      console.log("getting web3 ...")
+      const web3 = await getWeb3();
+      console.log({web3});
+      console.log("web3.version = ", web3.version);
+      console.log("web3.networkVersion =", web3.networkVersion);
 
       try {
-        // mint token
-        console.log("token =", this.form.token_index);
-        // Get network provider and web3 instance.
-        console.log("getting web3 ...")
-        const web3 = await getWeb3();
-        console.log({web3});
-        console.log("web3.version = ", web3.version);
-        console.log("web3.networkVersion =", web3.networkVersion);
 
         if (! this.networkId) {
           this.networkId = await web3.eth.net.getId();
@@ -351,6 +330,10 @@ export default {
           console.log("this.form.metadata     :", this.form.metadata)
           console.log("-----------------------------------------");
 
+          // https://github.com/ethereum/web3.js/issues/3327
+          web3.eth.handleRevert = true;
+          console.log("web3.eth.handleRevert =", web3.eth.handleRevert)
+
           /*
           function addItem(
               string memory _fileHash,
@@ -366,10 +349,21 @@ export default {
             this.form.product_name,
             token_amount_String,
             this.form.metadata,
-          ).send({ from: accounts[0], gas: 4e6, gasPrice: 1e6 });
+          ).send({ from: accounts[0], gas: 4e6, gasPrice: 1e6})
+          .on('error', (err, receipt) => {
+            if (err) console.log("err.message =",err.message);
+            console.log("receipt =", receipt);
+          });
+
+          console.log("web3.eth.handleRevert =", web3.eth.handleRevert)
+
 
           console.log("result =", this.result);
+          console.log("result.error =", this.result.error);
+          if (this.result.error)
+            console.log("result.error.message =", this.result.error.message);
           this.txHashPOA = this.result.transactionHash;
+          console.log("this.txHashPOA =", this.txHashPOA);
 
           this.contract.methods.getNumberOfItems(accounts[0]).call().then(n => {
             console.log("number of items is now : ", n) ;
@@ -378,9 +372,15 @@ export default {
             console.log("new entry =", item));
         }
 
-      } catch (error) {
+      } catch (err) {
+        console.log("web3.eth.handleRevert =", web3.eth.handleRevert)
+        console.error("catch(err) : err =", err);
+        if (err) {
+          console.log("err.message =",err.message);
+          console.log("err.signature =", err.signature);
+          console.log("err.reason =", err.reason);
+        }
         alert("Failed to load web3, accounts, contract or execute contract call. Check console for details.");
-        console.error(error);
       }
 
       /*
