@@ -1,7 +1,7 @@
 <template>
   <b-jumbotron>
-    <h1>Proof of Asset Explorer</h1>
-    <p class="lead">List of all assets registered by a certain address (selected network = {{selectedNetwork}}) :</p>
+    <h1>Tokenized Asset Explorer</h1>
+    <p class="lead">List of all assets registered by a certain address (selected network = {{networkName}}) :</p>
 
     <!--
     <small class="lead text-danger">{{errorMsg}}</small>
@@ -227,16 +227,15 @@ export default {
 
             row[header.blockTimestamp] = new Date(item.blockTimestamp*1000).toLocaleString(undefined, {dateStyle:'medium',timeStyle:'medium'});
 
-            row[header.productAmount] = item.productAmount / 10e18;
+            row[header.productAmount] = item.productAmount / (10 ** 18);
 
             row[header.productName] = item.productName;
 
-            row[header.mintAmount] = this.toFixed(item.mintAmount / (10 ** token.decimals), token.decimals < 6 ? token.decimals : 6)
-                                    + "<br/>" + "<a href='" + this.hashLink(item.tokenMintTx, 'tx') + "' target='_blank'>" + '[mint Tx]' + "</a>"; // TODO
+            row[header.mintAmount] = this.toFixed(item.mintAmount / (10 ** token.decimals)); // , token.decimals < 6 ? token.decimals : 6)
 
             row[header.tokenContractAddress] = "<a href='" + this.hashLink(item.tokenContractAddress, 'address') + "' target='_blank'>"
                                       + token.name + " (" + token.symbol + ")"
-                                      + "<br/>" + item.tokenContract + "</a>";
+                                      + "<br/>" + item.tokenContractAddress + "</a>";
 
             row[header.registrar] = "<a href='" + this.hashLink(item.registrar, 'address') + "' target='_blank'>" + item.registrar + "</a>";
 
