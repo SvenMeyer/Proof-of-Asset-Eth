@@ -1,7 +1,7 @@
 <template>
   <b-jumbotron>
     <h1>Tokenized Asset Explorer</h1>
-    <p class="lead">List of all assets registered by a certain address (selected network = {{networkName}}) :</p>
+    <p class="lead">Assets registered and minted Token (blockchain : Ethereum {{networkName}}) :</p>
 
     <!--
     <small class="lead text-danger">{{errorMsg}}</small>
