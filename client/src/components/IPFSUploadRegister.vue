@@ -89,8 +89,19 @@
 
       </b-form>
 
-      <p class="text-monospace">Tx Hash : <b-link :href="hashLink(txHashPOA, 'tx')" :disabled="!txHashPOA" target="_blank">{{ txHashPOA }}</b-link></p>
-      <p class="text-monospace">validForm = {{ validForm }}</p>
+      <b-progress class="mt-2" :max="maxTime" show-value>
+        <b-progress-bar :value="Math.min(transactionTime , maxTime/2)"    variant="success"></b-progress-bar>
+        <b-progress-bar :value="Math.max(transactionTime - maxTime/2, 0)" variant="warning"></b-progress-bar>
+      </b-progress>
+
+      <p></p>
+
+      <div v-if="txStatus.length > 0">
+        <p class="text-monospace">Tx Status: {{ txStatus }} </p>
+        <p class="text-monospace">Tx Hash  : <b-link :href="hashLink(txHashPOA, 'tx')" :disabled="!txHashPOA" target="_blank">{{ txHashPOA }}</b-link></p>
+      </div>
+
+      <!-- <p class="text-monospace">validForm = {{ validForm }}</p>  -->
 
     </div>
   </b-jumbotron>
@@ -146,12 +157,17 @@ export default {
       networkId   : null,  // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md#list-of-chain-ids
       networkName : null,
       deployedNetwork : null,
+
       contract: null,
       result: null,
-      txHashPOA: null,
+      txHashPOA: '',
       txMessage: null,
+      txStatus : '',
 
-      txHashMint: null,
+      timer: null,
+      transactionTime: 0,
+      maxTime: 60,
+      // txHashMint: null,
 
       items: [],
     };
@@ -334,6 +350,23 @@ export default {
           web3.eth.handleRevert = true;
           console.log("web3.eth.handleRevert =", web3.eth.handleRevert)
 
+          console.log("calculate expected seconds to wait for transaction to finish");
+          let last_block_number = await web3.eth.getBlockNumber();
+          console.log("last_block_number =", last_block_number);
+          let time_now = Date.now() / 1000.0;
+          console.log("time_now =", time_now);
+          // https://web3js.readthedocs.io/en/v1.2.0/web3-eth.html#getblock
+          let time_block_last = await web3.eth.getBlock(last_block_number).timestamp;
+          console.log("time_block_last =", time_block_last);
+          let time_block_prev = await web3.eth.getBlock(last_block_number-1).timestamp;
+          console.log("time_block_prev =", time_block_prev)
+          let sec_block = time_block_last - time_block_prev;
+          console.log("sec_block =", sec_block)
+          let sec_wait = sec_block - (time_now - time_block_last) + sec_block +1;
+          console.log("expected time to wait =", sec_wait);
+          if (!sec_wait)
+            sec_wait = 30;
+
           /*
           function addItem(
               string memory _fileHash,
@@ -343,6 +376,10 @@ export default {
               string memory _metadata)
           */
 
+          console.log("sending transaction ...");
+
+          this.txStatus = "waiting for user confirmation";
+
           this.result  = await this.contract.methods.addItem(
             this.ipfs_hash,
             product_amount_String,
@@ -350,10 +387,28 @@ export default {
             token_amount_String,
             this.form.metadata,
           ).send({ from: accounts[0], gas: 4e6, gasPrice: 1e6})
+          .once('transactionHash', (hash) => {
+            console.log("transactionHash =", hash);
+            this.txHashPOA = hash;
+            this.txStatus  = 'pending';
+            console.log("this.txHashPOA  =", this.txHashPOA);
+            this.transactionTime = 0;
+            this.timer = setInterval(() => { this.transactionTime += 1; }, 1000);
+          })
+          .once('receipt', (receipt) => {
+            console.log('receipt =', receipt);
+            this.txStatus = receipt.status ? 'confirmed' : 'ERROR (receipt)';
+          })
+          .once('confirmation', (confNumber, receipt) => {
+            console.log("confirmation : confNumber =", confNumber, "  receipt =", receipt);
+            this.txStatus = receipt.status ? 'confirmation #' + confNumber : 'ERROR (confirmation)';
+          })
           .on('error', (err, receipt) => {
             if (err) console.log("err.message =",err.message);
             console.log("receipt =", receipt);
           });
+
+          clearTimeout(this.timer);
 
           console.log("web3.eth.handleRevert =", web3.eth.handleRevert)
 
@@ -362,8 +417,8 @@ export default {
           console.log("result.error =", this.result.error);
           if (this.result.error)
             console.log("result.error.message =", this.result.error.message);
-          this.txHashPOA = this.result.transactionHash;
-          console.log("this.txHashPOA =", this.txHashPOA);
+
+          console.log("this.result.transactionHash =", this.result.transactionHash);
 
           this.contract.methods.getNumberOfItems(accounts[0]).call().then(n => {
             console.log("number of items is now : ", n) ;
@@ -380,6 +435,7 @@ export default {
           console.log("err.signature =", err.signature);
           console.log("err.reason =", err.reason);
         }
+        clearTimeout(this.timer);
         alert("Failed to load web3, accounts, contract or execute contract call. Check console for details.");
       }
 
@@ -402,6 +458,11 @@ export default {
     } catch(err) {
       /* eslint-disable */
     }
+  },
+
+  beforeDestroy() {
+    clearInterval(this.timer)
+    this.timer = null
   }
 
 }
