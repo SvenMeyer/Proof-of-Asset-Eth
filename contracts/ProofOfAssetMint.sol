@@ -2,6 +2,7 @@ pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;   // required to pass structs as function parameter and return values
 
 import "./FECoin.sol";
+// import "../../browser/FECoin.sol";  // remix
 
 /// @title  ProofOfAsset
 /// @author Sven Meyer
@@ -103,12 +104,12 @@ contract ProofOfAssetMint {
 		// check if any parameter is too long / out of scope
 
 		// check if item does not already exist
-        require(itemByHash[_fileHash].registrar == address(0), "item hash is already registere");
+    require(itemByHash[_fileHash].registrar == address(0), "item hash is already registered");
 
-        // TODO implement payable contract
+    // TODO implement payable contract
 		// require(msg.value (uint) == price, "amount sent does not match price");  // number of wei sent with the message
 
-        // check if a token contract has been set
+    // check if a token contract has been set
 		require(address(tokenContract) != address(0), 'No token contract defined');
 
 		bool tokenMintResult = tokenContract.mint(tx.origin, _mintAmount);
