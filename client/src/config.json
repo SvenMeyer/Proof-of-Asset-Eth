@@ -14,10 +14,10 @@
                 "4": "0x1621aec5d5b2e6ec6d9b58399e9d5253af86df5f",
                 "42": "0x1621aec5d5b2e6ec6d9b58399e9d5253af86df5f",
                 "50": "0x1621aec5d5b2e6ec6d9b58399e9d5253af86df5f",
-                "5777": "0xB67603876B8BAF976Cf521333160B823f4d1715e"
+                "5777": "0xB0B6FA2005FA1Cc8a3A2c1A97629150c347Cfb1d"
             },
             "decimals": 18,
-            "displayDecimals": 4
+            "displayDecimals": 3
         },
         {
             "symbol": "zrx",
