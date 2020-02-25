@@ -1,3 +1,4 @@
+// node --experimental-modules test_lib_Mathlib.mjs
 
 import MathUtils from '../src/lib/MathUtils.mjs'
 
