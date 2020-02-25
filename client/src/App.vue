@@ -5,6 +5,10 @@
 
       <b-navbar-brand href="#">Proof-of-Asset &amp; Tokenization</b-navbar-brand>
 
+      <b-navbar-nav class="ml-auto">
+        <b-nav-item href="http://fecoin.exchange/" target='_blank'>[FECoin.exchange]</b-nav-item>
+      </b-navbar-nav>
+
       <!-- Right aligned nav items -->
       <!--
       <b-navbar-nav class="ml-auto">
