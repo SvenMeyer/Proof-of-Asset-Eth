@@ -2,7 +2,7 @@
 
 import MathUtils from '../src/lib/MathUtils.mjs'
 
-const decimals = 6;
+const decimals = 6;  // has to match test case values
 
 const a = [ // inp, out
 	[       '0' ,  '0.000000'],
@@ -20,6 +20,7 @@ a.forEach( t => {
 	console.log(inp, out, MathUtils.fixedPoint_toString(inp, decimals));
 });
 
+console.log();
 
 const b = [ // inp , out
   [ '0.000000', '0' ],
@@ -53,7 +54,7 @@ const b = [ // inp , out
 ];
 
 let error = 0;
-console.log("MathUtils.fixedPoint_fromFloatSting")
+console.log("MathUtils.fixedPoint_fromString")
 b.forEach( t => {
 	let [inp, out] = t;
 	let result = MathUtils.fixedPoint_fromString(inp, decimals);
