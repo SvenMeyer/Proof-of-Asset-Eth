@@ -334,8 +334,8 @@ export default {
           console.log({tokenContract})
           console.log("tokenContract._address =", tokenContract._address)
 
-          let product_amount_String = MathUtils.uint_fixedPoint_fromFloatSting(this.form.product_amount.toString(), 18);
-          let token_amount_String   = MathUtils.uint_fixedPoint_fromFloatSting(this.form.token_amount.toString(), 18);
+          let product_amount_String = MathUtils.uint_fixedPoint_fromString(this.form.product_amount.toString(), 18);
+          let token_amount_String   = MathUtils.uint_fixedPoint_fromString(this.form.token_amount.toString(), 18);
 
           console.log("calling : contract.methods.addItem()");
           console.log("-----------------------------------------");

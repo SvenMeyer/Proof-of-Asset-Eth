@@ -14,10 +14,10 @@ const a = [ // inp, out
 	[  '-123456' ,  '-0.123456']
 ]
 
-console.log("MathUtils.fixedPoint_toFloatString");
+console.log("MathUtils.fixedPoint_toString");
 a.forEach( t => {
 	let [inp, out] = t;
-	console.log(inp, out, MathUtils.fixedPoint_toFloatString(inp, decimals));
+	console.log(inp, out, MathUtils.fixedPoint_toString(inp, decimals));
 });
 
 
@@ -56,7 +56,7 @@ let error = 0;
 console.log("MathUtils.fixedPoint_fromFloatSting")
 b.forEach( t => {
 	let [inp, out] = t;
-	let result = MathUtils.fixedPoint_fromFloatSting(inp, decimals);
+	let result = MathUtils.fixedPoint_fromString(inp, decimals);
 	console.log(inp, out, result , (result ? result : 'undefined') == out ? 'ok' : '*** ERROR ' + ++error);
 })
 console.log("ERRORS =", error)

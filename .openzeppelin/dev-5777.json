@@ -1,0 +1,176 @@
+{
+  "contracts": {
+    "ProofOfAsset": {
+      "address": "0x666888494455E672Dc33C251e64abF628e75bf6F",
+      "constructorCode": "6080604052600060025534801561001557600080fd5b5060008054600160a060020a03191633179055611405806100376000396000f3fe",
+      "bodyBytecodeHash": "3b6cf5fe3328487e3e4d78dbe23538b9955d11300c4660f2bcb07b56f633099f",
+      "localBytecodeHash": "13d00f1b9d7be6a27b900f5c073de8f3e5cc577e4e931727f19b306968d7a54e",
+      "deployedBytecodeHash": "13d00f1b9d7be6a27b900f5c073de8f3e5cc577e4e931727f19b306968d7a54e",
+      "types": {
+        "t_address": {
+          "id": "t_address",
+          "kind": "elementary",
+          "label": "address"
+        },
+        "t_uint256": {
+          "id": "t_uint256",
+          "kind": "elementary",
+          "label": "uint256"
+        },
+        "t_struct<ProofOfAsset.Item>": {
+          "id": "t_struct<ProofOfAsset.Item>",
+          "kind": "struct",
+          "label": "ProofOfAsset.Item",
+          "members": [
+            {
+              "label": "id",
+              "astId": 156,
+              "type": "t_uint256",
+              "src": "1288:11:2"
+            },
+            {
+              "label": "blockTimestamp",
+              "astId": 158,
+              "type": "t_uint256",
+              "src": "1350:23:2"
+            },
+            {
+              "label": "mintAmount",
+              "astId": 160,
+              "type": "t_uint256",
+              "src": "1408:19:2"
+            },
+            {
+              "label": "tokenContract",
+              "astId": 162,
+              "type": "t_address",
+              "src": "1485:22:2"
+            },
+            {
+              "label": "registrar",
+              "astId": 164,
+              "type": "t_address",
+              "src": "1542:18:2"
+            },
+            {
+              "label": "fileHash",
+              "astId": 166,
+              "type": "t_string",
+              "src": "1592:17:2"
+            },
+            {
+              "label": "adrCloudStorage",
+              "astId": 168,
+              "type": "t_string",
+              "src": "1663:24:2"
+            },
+            {
+              "label": "metadata",
+              "astId": 170,
+              "type": "t_string",
+              "src": "1731:17:2"
+            }
+          ]
+        },
+        "t_string": {
+          "id": "t_string",
+          "kind": "elementary",
+          "label": "string"
+        },
+        "t_mapping<t_struct<ProofOfAsset.Item>>": {
+          "id": "t_mapping<t_struct<ProofOfAsset.Item>>",
+          "valueType": "t_struct<ProofOfAsset.Item>",
+          "label": "mapping(key => ProofOfAsset.Item)",
+          "kind": "mapping"
+        },
+        "t_array:dyn<t_struct<ProofOfAsset.Item>>": {
+          "id": "t_array:dyn<t_struct<ProofOfAsset.Item>>",
+          "valueType": "t_struct<ProofOfAsset.Item>",
+          "length": "dyn",
+          "kind": "array",
+          "label": "ProofOfAsset.Item[]"
+        },
+        "t_mapping<t_array:dyn<t_struct<ProofOfAsset.Item>>>": {
+          "id": "t_mapping<t_array:dyn<t_struct<ProofOfAsset.Item>>>",
+          "valueType": "t_array:dyn<t_struct<ProofOfAsset.Item>>",
+          "label": "mapping(key => ProofOfAsset.Item[])",
+          "kind": "mapping"
+        }
+      },
+      "storage": [
+        {
+          "contract": "ProofOfAsset",
+          "path": "contracts/ProofOfAsset.sol",
+          "label": "owner",
+          "astId": 101,
+          "type": "t_address",
+          "src": "566:20:2"
+        },
+        {
+          "contract": "ProofOfAsset",
+          "path": "contracts/ProofOfAsset.sol",
+          "label": "price",
+          "astId": 112,
+          "type": "t_uint256",
+          "src": "692:18:2"
+        },
+        {
+          "contract": "ProofOfAsset",
+          "path": "contracts/ProofOfAsset.sol",
+          "label": "itemCount",
+          "astId": 174,
+          "type": "t_uint256",
+          "src": "1797:18:2"
+        },
+        {
+          "contract": "ProofOfAsset",
+          "path": "contracts/ProofOfAsset.sol",
+          "label": "items",
+          "astId": 186,
+          "type": "t_mapping<t_struct<ProofOfAsset.Item>>",
+          "src": "1987:35:2"
+        },
+        {
+          "contract": "ProofOfAsset",
+          "path": "contracts/ProofOfAsset.sol",
+          "label": "itemByHash",
+          "astId": 190,
+          "type": "t_mapping<t_struct<ProofOfAsset.Item>>",
+          "src": "2062:42:2"
+        },
+        {
+          "contract": "ProofOfAsset",
+          "path": "contracts/ProofOfAsset.sol",
+          "label": "itemsOfRegistrar",
+          "astId": 195,
+          "type": "t_mapping<t_array:dyn<t_struct<ProofOfAsset.Item>>>",
+          "src": "2167:51:2"
+        }
+      ],
+      "warnings": {
+        "hasConstructor": true,
+        "hasSelfDestruct": false,
+        "hasDelegateCall": false,
+        "hasInitialValuesInDeclarations": true,
+        "uninitializedBaseContracts": []
+      }
+    }
+  },
+  "solidityLibs": {},
+  "proxies": {
+    "poa-eth-vue/ProofOfAsset": [
+      {
+        "address": "0x75C95a3a68F1BFbc9Cd2F6dd6B6c12d98f9841B3",
+        "version": "1.0.0",
+        "implementation": "0x666888494455E672Dc33C251e64abF628e75bf6F",
+        "admin": "0x4aF533A382089D6dD8173cFc15bBcB87501F7b1F",
+        "kind": "Upgradeable"
+      }
+    ]
+  },
+  "manifestVersion": "2.2",
+  "version": "1.0.0",
+  "proxyAdmin": {
+    "address": "0x4aF533A382089D6dD8173cFc15bBcB87501F7b1F"
+  }
+}

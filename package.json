@@ -31,6 +31,6 @@
   },
   "devDependencies": {
     "@openzeppelin/cli": "^2.6.0",
-    "husky": "^4.2.2"
+    "husky": "^4.2.5"
   }
 }

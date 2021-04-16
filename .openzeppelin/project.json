@@ -1,18 +1,19 @@
 {
   "manifestVersion": "2.2",
-  "contracts": {},
+  "contracts": {
+    "ProofOfAsset": "ProofOfAsset"
+  },
   "dependencies": {},
   "name": "poa-eth-vue",
   "version": "1.0.0",
-  "telemetryOptIn": true,
   "compiler": {
-    "manager": "openzeppelin",
-    "solcVersion": "0.5.16",
+    "manager": "truffle",
     "compilerSettings": {
       "optimizer": {
         "enabled": false,
         "runs": "200"
       }
     }
-  }
+  },
+  "telemetryOptIn": true
 }

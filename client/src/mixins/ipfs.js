@@ -9,4 +9,4 @@ const ipfs_node = 'http://localhost:5001';
 
 export const ipfs = new IPFS(ipfs_node);
 
-export const ipfs_view = 'http://localhost:8080/ipfs/'; // 'https://ipfs.io/ipfs/',
+export const ipfs_view = 'http://localhost:8081/ipfs/'; // 'https://ipfs.io/ipfs/',
