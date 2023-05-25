@@ -28,9 +28,7 @@ const infuraKey = "fd09fff3423341508083acb38eefb499";
 const mnemonic_mainnet = process.env.MNEMONIC;
 
 // default mnemonic of Ganache GUI
-const mnemonic_dev         = "tomorrow draft giggle design purchase daring goddess cute inquiry giant thumb journey";
-const mnemonic_dev_candy   = "candy grid episode twelve survey average space piano puzzle tourist hero upon";
-const mnemonic_dev_truffle = "pill few wear village tower boat error taste awful panda entire limb";
+const mnemonic_dev         = process.env.MNEMONIC_DEV;
 
 const infura_project_id = '';
 
