@@ -1,0 +1,87 @@
+https://kovan.infura.io/v3/fd09fff3423341508083acb38eefb499:8545
+
+Starting migrations...
+======================
+> Network name:    'kovan'
+> Network id:      42
+> Block gas limit: 0x989680
+
+
+1_initial_migration.js
+======================
+
+   Deploying 'Migrations'
+   ----------------------
+   > transaction hash:    0x7e8c86405f9dce0635167edf145c4d81a0b31aa72c1717c151274f06e553936c
+   > Blocks: 2            Seconds: 5
+   > contract address:    0x6C9A37B0FD6334c4a01e91EEB1a6a69d153e305b
+   > block number:        16970117
+   > block timestamp:     1582545300
+   > account:             0xa31F3d5d0d8A412084a3f83D253340524F7f8897
+   > balance:             12.0790747583
+   > gas used:            225237
+   > gas price:           25 gwei
+   > value sent:          0 ETH
+   > total cost:          0.005630925 ETH
+
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:         0.005630925 ETH
+
+
+2_deploy_contracts.js
+=====================
+
+   Deploying 'ProofOfAssetMint'
+   ----------------------------
+   > transaction hash:    0xc837765b344a5f893ee63c994b5118861221cb5c14ca0422cadb08e6f2197683
+   > Blocks: 1            Seconds: 6
+   > contract address:    0xeE1F6ea14c2fDff7577F3D0b48e18330EbFC268a
+   > block number:        16970124
+   > block timestamp:     1582545328
+   > account:             0xa31F3d5d0d8A412084a3f83D253340524F7f8897
+   > balance:             12.0230805833
+   > gas used:            2197404
+   > gas price:           25 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0549351 ETH
+
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:           0.0549351 ETH
+
+
+3_deploy_FECoin.js
+==================
+
+   Deploying 'FECoin'
+   ------------------
+   > transaction hash:    0xfa0a1bf6d8d407fa4be8964e8ac1f8c9ef234008eba75ec60814637f1f416597
+   > Blocks: 3            Seconds: 10
+   > contract address:    0x14920d278C20079073F405247C21FCFcF2A9A81D
+   > block number:        16970131
+   > block timestamp:     1582545356
+   > account:             0xa31F3d5d0d8A412084a3f83D253340524F7f8897
+   > balance:             11.9781665083
+   > gas used:            1769200
+   > gas price:           25 gwei
+   > value sent:          0 ETH
+   > total cost:          0.04423 ETH
+
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:             0.04423 ETH
+
+
+Summary
+=======
+> Total deployments:   3
+
+--------------------------
+
